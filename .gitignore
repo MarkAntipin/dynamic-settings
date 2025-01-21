@@ -1,0 +1,6 @@
+/target
+.idea
+tags
+**/*.rs.bk
+.DS_Store
+.env

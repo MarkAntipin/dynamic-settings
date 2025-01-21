@@ -1,0 +1,24 @@
+[package]
+name = "dynamic_settings"
+version = "0.1.0"
+authors = ["Mark Antipin <mr.antipin@gmail.com>"]
+edition = "2021"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "src/main.rs"
+name = "dynamic_settings"
+
+[dependencies]
+actix-web = "4.9.0"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+reqwest = { version = "0.12.9", features = ["json"] }
+serde = { version = "1.0.216", features = ["derive"] }
+config = "0.11.0"
+dotenv = "0.15.0"
+sqlx = { version = "0.8.2", default-features = false, features = ["runtime-tokio", "macros", "postgres"] }
+serde_json = "1.0.134"
+derive_more = "0.99.18"
+uuid = { version = "1.12.0", features = ["v4"] }
