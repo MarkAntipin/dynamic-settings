@@ -1,5 +1,7 @@
 use uuid::Uuid;
 
+use reqwest::header::{HeaderMap, HeaderValue};
+
 use crate::helpers::spawn_app;
 use dynamic_settings::models::{MessageResponse, Settings, SettingsValueType};
 use dynamic_settings::repository::pg_add_settings;
@@ -23,10 +25,16 @@ async fn test_get_settings_by_key_ok() {
         .await
         .expect("Failed to add settings");
 
-    // Act
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        "X-Api-Key",
+        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
+    );
 
+    // Act
     let response = client
         .get(&format!("{}/api/v1/settings/{}", &app.address, key))
+        .headers(headers)
         .send()
         .await
         .expect("Failed to execute request.");
@@ -49,9 +57,16 @@ async fn test_get_settings_by_key_key_does_not_exist() {
     let client = reqwest::Client::new();
     let key = Uuid::new_v4().to_string();
 
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        "X-Api-Key",
+        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
+    );
+
     // Act
     let response = client
         .get(&format!("{}/api/v1/settings/{}", &app.address, key))
+        .headers(headers)
         .send()
         .await
         .expect("Failed to execute request.");

@@ -5,10 +5,11 @@ use serde_json::to_string_pretty;
 
 #[derive(Debug, Display)]
 pub enum CustomError {
-    NotFound,
     SerializeError(String),
     ValidationError(String),
     InternalError(String),
+    UnauthorizedError(String),
+    NotFoundError(String),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -26,10 +27,11 @@ impl ErrorResponse<'_> {
 impl ResponseError for CustomError {
     fn status_code(&self) -> StatusCode {
         match self {
-            CustomError::NotFound => StatusCode::NOT_FOUND,
             CustomError::SerializeError(_) => StatusCode::BAD_REQUEST,
             CustomError::ValidationError(_) => StatusCode::UNPROCESSABLE_ENTITY,
             CustomError::InternalError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            CustomError::UnauthorizedError(_) => StatusCode::UNAUTHORIZED,
+            CustomError::NotFoundError(_) => StatusCode::NOT_FOUND,
         }
     }
 
@@ -37,18 +39,12 @@ impl ResponseError for CustomError {
         let status = self.status_code();
 
         match self {
-            CustomError::NotFound => {
-                let message = "Not Found";
-                HttpResponse::build(status).body(ErrorResponse::new(&message))
-            }
-            CustomError::SerializeError(message) => {
-                HttpResponse::build(status).body(ErrorResponse::new(&message))
-            }
-            CustomError::ValidationError(message) => {
-                HttpResponse::build(status).body(ErrorResponse::new(&message))
-            }
-            CustomError::InternalError(message) => {
-                HttpResponse::build(status).body(ErrorResponse::new(&message))
+            CustomError::SerializeError(message)
+            | CustomError::ValidationError(message)
+            | CustomError::InternalError(message)
+            | CustomError::UnauthorizedError(message)
+            | CustomError::NotFoundError(message) => {
+                HttpResponse::build(status).body(ErrorResponse::new(message))
             }
         }
     }

@@ -32,7 +32,7 @@ migrate -path migrations -database "postgres://dynamic-settings:dynamic-settings
 cargo test
 ```
 
-**Tests:**
+**Run:**
 ```
 cargo run
 ```

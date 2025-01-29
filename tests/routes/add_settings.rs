@@ -1,5 +1,7 @@
 use uuid::Uuid;
 
+use reqwest::header::{HeaderMap, HeaderValue};
+
 use crate::helpers::spawn_app;
 use dynamic_settings::models::MessageResponse;
 use dynamic_settings::models::{Settings, SettingsValueType};
@@ -21,9 +23,17 @@ async fn test_add_settings_int_ok() {
         "value": value,
         "type": value_type
     });
+
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        "X-Api-Key",
+        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
+    );
+
     let response = client
         .post(&format!("{}/api/v1/settings", &app.address))
         .json(&body)
+        .headers(headers)
         .send()
         .await
         .expect("Failed to execute request.");
@@ -57,14 +67,22 @@ async fn test_add_settings_float_ok() {
     let value_type = "float";
     let value = "100.5";
 
-    // Act
     let body = serde_json::json!({
         "key": key,
         "value": value,
         "type": value_type
     });
+
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        "X-Api-Key",
+        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
+    );
+
+    // Act
     let response = client
         .post(&format!("{}/api/v1/settings", &app.address))
+        .headers(headers)
         .json(&body)
         .send()
         .await
@@ -99,15 +117,23 @@ async fn test_add_settings_bool_ok() {
     let value_type = "bool";
     let value = "true";
 
-    // Act
     let body = serde_json::json!({
         "key": key,
         "value": value,
         "type": value_type
     });
+
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        "X-Api-Key",
+        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
+    );
+
+    // Act
     let response = client
         .post(&format!("{}/api/v1/settings", &app.address))
         .json(&body)
+        .headers(headers)
         .send()
         .await
         .expect("Failed to execute request.");
@@ -140,15 +166,23 @@ async fn test_add_settings_int_invalid() {
     let value_type = "int";
     let value = "invalid";
 
-    // Act
     let body = serde_json::json!({
         "key": key,
         "value": value,
         "type": value_type
     });
+
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        "X-Api-Key",
+        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
+    );
+
+    // Act
     let response = client
         .post(&format!("{}/api/v1/settings", &app.address))
         .json(&body)
+        .headers(headers)
         .send()
         .await
         .expect("Failed to execute request.");
@@ -183,16 +217,23 @@ async fn test_add_settings_key_already_exists() {
         .await
         .expect("Failed to add settings");
 
-    // Act
     let body = serde_json::json!({
         "key": key,
         "value": value,
         "type": value_type
     });
 
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        "X-Api-Key",
+        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
+    );
+
+    // Act
     let response = client
         .post(&format!("{}/api/v1/settings", &app.address))
         .json(&body)
+        .headers(headers)
         .send()
         .await
         .expect("Failed to execute request.");
@@ -219,15 +260,23 @@ async fn test_add_settings_invalid_input() {
     let key = Uuid::new_v4().to_string();
     let value = "invalid";
 
-    // Act
     let body = serde_json::json!({
         "key": key,
         "value": value,
         // missing type
     });
+
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        "X-Api-Key",
+        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
+    );
+
+    // Act
     let response = client
         .post(&format!("{}/api/v1/settings", &app.address))
         .json(&body)
+        .headers(headers)
         .send()
         .await
         .expect("Failed to execute request.");

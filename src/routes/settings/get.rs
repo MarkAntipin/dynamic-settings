@@ -12,6 +12,11 @@ pub async fn get_settings_by_key(
 ) -> Result<HttpResponse, CustomError> {
     let settings = pg_get_settings_by_key(&pool, &key).await?;
     if settings.is_none() {
+        // TODO: does it better to use custom error?
+        // return Err(CustomError::NotFoundError(format!(
+        //     "Settings with key '{}' not found",
+        //     key
+        // )));
         let response = MessageResponse {
             message: format!("Settings with key '{}' not found", key),
         };

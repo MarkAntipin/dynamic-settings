@@ -2,11 +2,11 @@ use config::Environment;
 use dotenv::dotenv;
 use serde::Deserialize;
 
-
 // # TODO: default values in Config
 #[derive(Deserialize, Debug)]
 pub struct Config {
     pub application_port: u16,
+    pub api_key: String,
 
     pub pg_username: String,
     pub pg_password: String,
