@@ -252,7 +252,7 @@ async fn test_add_settings_key_already_exists() {
 }
 
 #[tokio::test]
-async fn test_add_settings_invalid_input() {
+async fn test_add_settings_invalid_input_missing_type() {
     // Arrange
     let app = spawn_app().await;
     let client = reqwest::Client::new();
@@ -289,4 +289,44 @@ async fn test_add_settings_invalid_input() {
         .await
         .expect("Failed to parse response body.");
     assert_eq!(body.message, "Json deserialize error: missing field `type`");
+}
+
+#[tokio::test]
+async fn test_add_settings_invalid_input_key_is_to_big() {
+    // Arrange
+    let app = spawn_app().await;
+    let client = reqwest::Client::new();
+
+    let value_type = "int";
+    let value = "100";
+
+    // Act
+    let body = serde_json::json!({
+        "key": "a".repeat(10000),
+        "value": value,
+        "type": value_type
+    });
+
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        "X-Api-Key",
+        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
+    );
+
+    let response = client
+        .post(&format!("{}/api/v1/settings", &app.address))
+        .json(&body)
+        .headers(headers)
+        .send()
+        .await
+        .expect("Failed to execute request.");
+
+    // Assert
+    assert_eq!(response.status(), 422);
+
+    let body: MessageResponse = response
+        .json()
+        .await
+        .expect("Failed to parse response body.");
+    assert_eq!(body.message, "Key length should be less than 1024 bytes");
 }

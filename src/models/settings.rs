@@ -2,6 +2,9 @@ use crate::errors::CustomError;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
+const MAX_KEY_LENGTH: usize = 1024;
+const MAX_VALUE_LENGTH: usize = 65536;
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum SettingsValueType {
@@ -45,6 +48,22 @@ impl From<String> for SettingsValueType {
 
 impl Settings {
     pub fn validate(&self) -> Result<(), CustomError> {
+        println!("Validating settings: {}", self.key.len());
+
+        if self.key.len() > MAX_KEY_LENGTH {
+            return Err(CustomError::ValidationError(format!(
+                "Key length should be less than {} bytes",
+                MAX_KEY_LENGTH
+            )));
+        }
+
+        if self.value.len() > MAX_VALUE_LENGTH {
+            return Err(CustomError::ValidationError(format!(
+                "Value length should be less than {} bytes",
+                MAX_VALUE_LENGTH
+            )));
+        }
+
         match self.value_type {
             SettingsValueType::Str => Ok(()),
             SettingsValueType::Int => {
