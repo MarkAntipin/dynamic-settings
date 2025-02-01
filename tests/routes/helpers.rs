@@ -1,12 +1,13 @@
-use sqlx::PgPool;
-use std::net::TcpListener;
-
 use dynamic_settings::config::get_config;
+use dynamic_settings::models::{Settings, SettingsDB};
 use dynamic_settings::startup;
+use fjall::PartitionHandle;
+use fjall::{Config, PartitionCreateOptions};
+use std::net::TcpListener;
 
 pub struct TestApp {
     pub address: String,
-    pub pg_pool: PgPool,
+    pub partition: PartitionHandle,
     pub api_key: String,
 }
 
@@ -15,19 +16,48 @@ pub async fn spawn_app() -> TestApp {
     let port = listener.local_addr().unwrap().port();
 
     let config = get_config().expect("Failed to read configuration.");
-    let pg_pool = PgPool::connect(&config.pg_connection_string())
-        .await
-        .expect("Failed to connect to Postgres.");
 
-    let server = startup::run(listener, pg_pool.clone(), config.api_key.clone())
+    let keyspace = Config::new("db")
+        .open()
+        .expect("Failed connect to keyspace");
+    let partition = keyspace
+        .open_partition("settings", PartitionCreateOptions::default())
+        .expect("Failed to connect to partition");
+    let settings_db = SettingsDB {
+        keyspace,
+        partition: partition.clone(),
+    };
+
+    let server = startup::run(listener, settings_db, config.api_key.clone())
         .expect("Failed to bind address");
 
     let _ = tokio::spawn(server);
 
     let test_app = TestApp {
         address: format!("http://127.0.0.1:{}", port),
-        pg_pool: pg_pool,
+        partition,
         api_key: config.api_key,
     };
     test_app
+}
+
+pub fn add_settings(partition: &PartitionHandle, settings: &Settings) -> () {
+    let key = &settings.key;
+    let serialized: Vec<u8> = settings.into();
+    partition
+        .insert(key, serialized)
+        .expect("Failed to insert settings");
+}
+
+pub fn get_settings(
+    partition: &PartitionHandle,
+    key: &str,
+) -> Result<Option<Settings>, fjall::Error> {
+    let Some(item) = partition.get(key)? else {
+        return Ok(None);
+    };
+
+    let settings: Settings =
+        rmp_serde::from_slice(&item).expect("Error deserializing settings from bytes");
+    Ok(Some(settings))
 }

@@ -1,5 +1,6 @@
 use actix_web::{http::StatusCode, HttpResponse, ResponseError};
 use derive_more::Display;
+use fjall;
 use serde::{Deserialize, Serialize};
 use serde_json::to_string_pretty;
 
@@ -50,8 +51,8 @@ impl ResponseError for CustomError {
     }
 }
 
-impl From<sqlx::Error> for CustomError {
-    fn from(err: sqlx::Error) -> Self {
+impl From<fjall::Error> for CustomError {
+    fn from(err: fjall::Error) -> Self {
         match err {
             _ => CustomError::InternalError("Internal Server Error".to_string()),
         }

@@ -1,3 +1,3 @@
-mod postgres;
+mod db;
 
-pub use postgres::*;
+pub use db::*;

@@ -7,11 +7,10 @@ use actix_web::{
     middleware::{from_fn, Next},
     web, App, Error, HttpResponse, HttpServer,
 };
-use sqlx::PgPool;
 
 use crate::{
     errors::CustomError,
-    models::MessageResponse,
+    models::{MessageResponse, SettingsDB},
     routes::{add_settings, get_settings, get_settings_by_key, health_check},
 };
 
@@ -37,7 +36,7 @@ async fn auth_middleware_new(
     let api_key_header = headers.get("X-Api-Key");
 
     if api_key_header.is_none() {
-        // TODO: how to use custom error? Do not like that `InternalError` looks redundant
+        // TODO: how to use custom error? `InternalError` looks redundant
         let error_body = MessageResponse {
             message: "missing `X-Api-Key` header".to_string(),
         };
@@ -47,7 +46,7 @@ async fn auth_middleware_new(
 
     let expected_api_key = req.app_data::<String>().unwrap();
     if api_key_header.unwrap().to_str().unwrap() != expected_api_key {
-        // TODO: how to use custom error? Do not like that `InternalError` looks redundant
+        // TODO: how to use custom error? `InternalError` looks redundant
         let error_body = MessageResponse {
             message: "invalid `X-Api-Key` header".to_string(),
         };
@@ -59,10 +58,10 @@ async fn auth_middleware_new(
 
 pub fn run(
     listener: TcpListener,
-    db_pool: PgPool,
+    db: SettingsDB,
     api_key: String,
 ) -> Result<Server, std::io::Error> {
-    let db_pool = web::Data::new(db_pool);
+    let db = web::Data::new(db);
 
     let server = HttpServer::new(move || {
         App::new()
@@ -73,9 +72,9 @@ pub fn run(
                     .route("", web::get().to(get_settings))
                     .route("/{key}", web::get().to(get_settings_by_key)),
             )
-            .route("/health_check", web::get().to(health_check))
-            .app_data(db_pool.clone())
+            .route("/health", web::get().to(health_check))
             .app_data(api_key.clone())
+            .app_data(db.clone())
             .configure(json_error_handler)
     })
     .listen(listener)?

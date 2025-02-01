@@ -2,10 +2,9 @@ use uuid::Uuid;
 
 use reqwest::header::{HeaderMap, HeaderValue};
 
-use crate::helpers::spawn_app;
+use crate::helpers::{add_settings, get_settings, spawn_app};
 use dynamic_settings::models::MessageResponse;
 use dynamic_settings::models::{Settings, SettingsValueType};
-use dynamic_settings::repository::{pg_add_settings, pg_get_settings_by_key};
 
 #[tokio::test]
 async fn test_add_settings_int_ok() {
@@ -48,8 +47,7 @@ async fn test_add_settings_int_ok() {
     assert_eq!(body.message, format!("Settings with key '{}' created", key));
 
     // TODO: is it ok to use func from repository directly in tests?
-    let settings = pg_get_settings_by_key(&app.pg_pool, &key)
-        .await
+    let settings = get_settings(&app.partition, &key)
         .expect("Failed to fetch the setting")
         .expect(&format!("Settings not found for key: {}", key));
 
@@ -98,8 +96,7 @@ async fn test_add_settings_float_ok() {
         .expect("Failed to parse response body.");
     assert_eq!(body.message, format!("Settings with key '{}' created", key));
 
-    let settings = pg_get_settings_by_key(&app.pg_pool, &key)
-        .await
+    let settings = get_settings(&app.partition, &key)
         .expect("Failed to fetch the setting")
         .expect(&format!("Settings not found for key: {}", key));
 
@@ -147,8 +144,7 @@ async fn test_add_settings_bool_ok() {
         .expect("Failed to parse response body.");
     assert_eq!(body.message, format!("Settings with key '{}' created", key));
 
-    let settings = pg_get_settings_by_key(&app.pg_pool, &key)
-        .await
+    let settings = get_settings(&app.partition, &key)
         .expect("Failed to fetch the setting")
         .expect(&format!("Settings not found for key: {}", key));
 
@@ -213,9 +209,7 @@ async fn test_add_settings_key_already_exists() {
         value_type: SettingsValueType::Int,
     };
 
-    pg_add_settings(&app.pg_pool, &settings)
-        .await
-        .expect("Failed to add settings");
+    add_settings(&app.partition, &settings);
 
     let body = serde_json::json!({
         "key": key,

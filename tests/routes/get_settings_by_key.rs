@@ -2,9 +2,8 @@ use uuid::Uuid;
 
 use reqwest::header::{HeaderMap, HeaderValue};
 
-use crate::helpers::spawn_app;
+use crate::helpers::{add_settings, spawn_app};
 use dynamic_settings::models::{MessageResponse, Settings, SettingsValueType};
-use dynamic_settings::repository::pg_add_settings;
 
 #[tokio::test]
 async fn test_get_settings_by_key_ok() {
@@ -21,9 +20,7 @@ async fn test_get_settings_by_key_ok() {
         value_type: SettingsValueType::Int,
     };
 
-    pg_add_settings(&app.pg_pool, &settings)
-        .await
-        .expect("Failed to add settings");
+    add_settings(&app.partition, &settings);
 
     let mut headers = HeaderMap::new();
     headers.insert(

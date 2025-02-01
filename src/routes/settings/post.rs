@@ -1,18 +1,17 @@
 use crate::errors::CustomError;
-use crate::models::{MessageResponse, Settings};
-use crate::repository::pg_add_settings;
+use crate::models::{MessageResponse, Settings, SettingsDB};
+use crate::repository::db_add_settings;
 use actix_web::web;
 use actix_web::HttpResponse;
-use sqlx::PgPool;
 
 pub async fn add_settings(
-    pool: web::Data<PgPool>,
+    db: web::Data<SettingsDB>,
     settings: web::Json<Settings>,
 ) -> Result<HttpResponse, CustomError> {
     let settings = settings.into_inner();
     settings.validate()?;
 
-    let key = pg_add_settings(&pool, &settings).await?;
+    let key = db_add_settings(&db, &settings)?;
 
     if key.is_none() {
         let response = MessageResponse {

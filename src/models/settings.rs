@@ -1,6 +1,9 @@
-use crate::errors::CustomError;
-use serde::{Deserialize, Serialize};
 use std::fmt;
+
+use fjall::{UserKey, UserValue};
+use serde::{Deserialize, Serialize};
+
+use crate::errors::CustomError;
 
 const MAX_KEY_LENGTH: usize = 1024;
 const MAX_VALUE_LENGTH: usize = 65536;
@@ -12,14 +15,6 @@ pub enum SettingsValueType {
     Int,
     Float,
     Bool,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Settings {
-    pub key: String,
-    pub value: String,
-    #[serde(rename = "type")]
-    pub value_type: SettingsValueType,
 }
 
 impl fmt::Display for SettingsValueType {
@@ -46,10 +41,38 @@ impl From<String> for SettingsValueType {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct Settings {
+    pub key: String,
+    pub value: String,
+    #[serde(rename = "type")]
+    pub value_type: SettingsValueType,
+}
+
+impl From<&Settings> for Vec<u8> {
+    fn from(val: &Settings) -> Self {
+        rmp_serde::to_vec(&val).expect("Error serializing settings to bytes")
+    }
+}
+
+impl From<(UserKey, UserValue)> for Settings {
+    fn from((key, value): (UserKey, UserValue)) -> Self {
+        let key = std::str::from_utf8(&key).unwrap();
+        let mut item: Settings =
+            rmp_serde::from_slice(&value).expect("Error deserializing settings from bytes");
+        key.clone_into(&mut item.key);
+        item
+    }
+}
+
+impl fmt::Display for Settings {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} - {}, {}", self.key, self.value, self.value_type)
+    }
+}
+
 impl Settings {
     pub fn validate(&self) -> Result<(), CustomError> {
-        println!("Validating settings: {}", self.key.len());
-
         if self.key.len() > MAX_KEY_LENGTH {
             return Err(CustomError::ValidationError(format!(
                 "Key length should be less than {} bytes",
