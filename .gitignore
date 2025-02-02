@@ -4,4 +4,4 @@ tags
 **/*.rs.bk
 .DS_Store
 .env
-db
+/db
