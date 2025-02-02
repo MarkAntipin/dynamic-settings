@@ -30,7 +30,7 @@ async fn test_get_settings_by_key_ok() {
 
     // Act
     let response = client
-        .get(&format!("{}/api/v1/settings/{}", &app.address, key))
+        .get(format!("{}/api/v1/settings/{}", &app.address, key))
         .headers(headers)
         .send()
         .await
@@ -62,7 +62,7 @@ async fn test_get_settings_by_key_key_does_not_exist() {
 
     // Act
     let response = client
-        .get(&format!("{}/api/v1/settings/{}", &app.address, key))
+        .get(format!("{}/api/v1/settings/{}", &app.address, key))
         .headers(headers)
         .send()
         .await

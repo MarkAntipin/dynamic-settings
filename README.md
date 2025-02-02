@@ -11,6 +11,11 @@ APPLICATION_PORT=
 API_KEY=
 ```
 
+**Linters:**
+```
+cargo clippy --all-targets --all-features
+```
+
 [//]: # (TODO: get rid of RUST_TEST_THREADS=1)
 **Tests:**
 ```

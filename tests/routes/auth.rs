@@ -14,7 +14,7 @@ async fn test_auth_no_api_key_header() {
 
     // Act
     let response = client
-        .get(&format!("{}/api/v1/settings/{}", &app.address, key))
+        .get(format!("{}/api/v1/settings/{}", &app.address, key))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -46,7 +46,7 @@ async fn test_auth_invalid_api_key_header() {
 
     // Act
     let response = client
-        .get(&format!("{}/api/v1/settings/{}", &app.address, key))
+        .get(format!("{}/api/v1/settings/{}", &app.address, key))
         .headers(headers)
         .send()
         .await
