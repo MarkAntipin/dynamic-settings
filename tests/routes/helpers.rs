@@ -31,17 +31,17 @@ pub async fn spawn_app() -> TestApp {
     let server = startup::run(listener, settings_db, config.api_key.clone())
         .expect("Failed to bind address");
 
-    let _ = tokio::spawn(server);
+    tokio::spawn(server);
 
-    let test_app = TestApp {
+    
+    TestApp {
         address: format!("http://127.0.0.1:{}", port),
         partition,
         api_key: config.api_key,
-    };
-    test_app
+    }
 }
 
-pub fn add_settings(partition: &PartitionHandle, settings: &Settings) -> () {
+pub fn add_settings(partition: &PartitionHandle, settings: &Settings) {
     let key = &settings.key;
     let serialized: Vec<u8> = settings.into();
     partition

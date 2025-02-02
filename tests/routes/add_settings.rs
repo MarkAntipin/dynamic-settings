@@ -30,7 +30,7 @@ async fn test_add_settings_int_ok() {
     );
 
     let response = client
-        .post(&format!("{}/api/v1/settings", &app.address))
+        .post(format!("{}/api/v1/settings", &app.address))
         .json(&body)
         .headers(headers)
         .send()
@@ -49,7 +49,7 @@ async fn test_add_settings_int_ok() {
     // TODO: is it ok to use func from repository directly in tests?
     let settings = get_settings(&app.partition, &key)
         .expect("Failed to fetch the setting")
-        .expect(&format!("Settings not found for key: {}", key));
+        .unwrap_or_else(|| panic!("Settings not found for key: {}", key));
 
     assert_eq!(settings.key, key);
     assert_eq!(settings.value, value);
@@ -79,7 +79,7 @@ async fn test_add_settings_float_ok() {
 
     // Act
     let response = client
-        .post(&format!("{}/api/v1/settings", &app.address))
+        .post(format!("{}/api/v1/settings", &app.address))
         .headers(headers)
         .json(&body)
         .send()
@@ -98,7 +98,7 @@ async fn test_add_settings_float_ok() {
 
     let settings = get_settings(&app.partition, &key)
         .expect("Failed to fetch the setting")
-        .expect(&format!("Settings not found for key: {}", key));
+        .unwrap_or_else(|| panic!("Settings not found for key: {}", key));
 
     assert_eq!(settings.key, key);
     assert_eq!(settings.value, value);
@@ -128,7 +128,7 @@ async fn test_add_settings_bool_ok() {
 
     // Act
     let response = client
-        .post(&format!("{}/api/v1/settings", &app.address))
+        .post(format!("{}/api/v1/settings", &app.address))
         .json(&body)
         .headers(headers)
         .send()
@@ -146,7 +146,7 @@ async fn test_add_settings_bool_ok() {
 
     let settings = get_settings(&app.partition, &key)
         .expect("Failed to fetch the setting")
-        .expect(&format!("Settings not found for key: {}", key));
+        .unwrap_or_else(|| panic!("Settings not found for key: {}", key));
 
     assert_eq!(settings.key, key);
     assert_eq!(settings.value, value);
@@ -176,7 +176,7 @@ async fn test_add_settings_int_invalid() {
 
     // Act
     let response = client
-        .post(&format!("{}/api/v1/settings", &app.address))
+        .post(format!("{}/api/v1/settings", &app.address))
         .json(&body)
         .headers(headers)
         .send()
@@ -225,7 +225,7 @@ async fn test_add_settings_key_already_exists() {
 
     // Act
     let response = client
-        .post(&format!("{}/api/v1/settings", &app.address))
+        .post(format!("{}/api/v1/settings", &app.address))
         .json(&body)
         .headers(headers)
         .send()
@@ -268,7 +268,7 @@ async fn test_add_settings_invalid_input_missing_type() {
 
     // Act
     let response = client
-        .post(&format!("{}/api/v1/settings", &app.address))
+        .post(format!("{}/api/v1/settings", &app.address))
         .json(&body)
         .headers(headers)
         .send()
@@ -308,7 +308,7 @@ async fn test_add_settings_invalid_input_key_is_to_big() {
     );
 
     let response = client
-        .post(&format!("{}/api/v1/settings", &app.address))
+        .post(format!("{}/api/v1/settings", &app.address))
         .json(&body)
         .headers(headers)
         .send()

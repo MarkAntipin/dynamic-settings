@@ -19,7 +19,7 @@ pub struct ErrorResponse<'a> {
 }
 
 impl ErrorResponse<'_> {
-    pub fn new(message: &str) -> String {
+    pub fn to_json(message: &str) -> String {
         let error_response = ErrorResponse { message };
         to_string_pretty(&error_response).unwrap()
     }
@@ -45,16 +45,14 @@ impl ResponseError for CustomError {
             | CustomError::InternalError(message)
             | CustomError::UnauthorizedError(message)
             | CustomError::NotFoundError(message) => {
-                HttpResponse::build(status).body(ErrorResponse::new(message))
+                HttpResponse::build(status).body(ErrorResponse::to_json(message))
             }
         }
     }
 }
 
 impl From<fjall::Error> for CustomError {
-    fn from(err: fjall::Error) -> Self {
-        match err {
-            _ => CustomError::InternalError("Internal Server Error".to_string()),
-        }
+    fn from(_: fjall::Error) -> Self {
+        CustomError::InternalError("Internal Server Error".to_string())
     }
 }
