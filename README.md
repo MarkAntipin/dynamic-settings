@@ -11,9 +11,10 @@ APPLICATION_PORT=
 API_KEY=
 ```
 
+[//]: # (TODO: get rid of RUST_TEST_THREADS=1)
 **Tests:**
 ```
-cargo test
+RUST_TEST_THREADS=1 cargo test
 ```
 
 **Run:**
