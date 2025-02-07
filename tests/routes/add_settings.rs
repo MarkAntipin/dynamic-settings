@@ -6,150 +6,64 @@ use crate::helpers::{add_settings, get_settings, spawn_app};
 use dynamic_settings::models::MessageResponse;
 use dynamic_settings::models::{Settings, SettingsValueType};
 
+
 #[tokio::test]
-async fn test_add_settings_int_ok() {
+async fn test_add_settings_ok() {
+    let test_cases = vec![
+        ("100", "int"),
+        ("100.5", "float"),
+        ("true", "bool"),
+        ("\"string\"", "str"),
+        ("[1, 2, 3]", "json"),
+        ("{\"key\": \"value\", \"key2\": [1, 2, 3]}", "json"),
+    ];
+
     // Arrange
     let app = spawn_app().await;
     let client = reqwest::Client::new();
 
-    let key = Uuid::new_v4().to_string();
-    let value_type = "int";
-    let value = "100";
+    for (value, value_type) in test_cases {
+        // Arrange
+        let key = Uuid::new_v4().to_string();
 
-    // Act
-    let body = serde_json::json!({
-        "key": key,
-        "value": value,
-        "type": value_type
-    });
+        let body = serde_json::json!({
+            "key": key,
+            "value": value,
+            "type": value_type
+        });
 
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        "X-Api-Key",
-        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
-    );
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            "X-Api-Key",
+            HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
+        );
 
-    let response = client
-        .post(format!("{}/api/v1/settings", &app.address))
-        .json(&body)
-        .headers(headers)
-        .send()
-        .await
-        .expect("Failed to execute request.");
+        // Act
+        let response = client
+            .post(format!("{}/api/v1/settings", &app.address))
+            .json(&body)
+            .headers(headers)
+            .send()
+            .await
+            .expect("Failed to execute request.");
 
-    // Assert
-    assert_eq!(response.status(), 201);
+        // Assert
+        assert_eq!(response.status(), 201);
 
-    let body: MessageResponse = response
-        .json()
-        .await
-        .expect("Failed to parse response body.");
-    assert_eq!(body.message, format!("Settings with key '{}' created", key));
+        let body: MessageResponse = response
+            .json()
+            .await
+            .expect("Failed to parse response body.");
+        assert_eq!(body.message, format!("Settings with key '{}' created", key));
 
-    // TODO: is it ok to use func from repository directly in tests?
-    let settings = get_settings(&app.partition, &key)
-        .expect("Failed to fetch the setting")
-        .unwrap_or_else(|| panic!("Settings not found for key: {}", key));
+        // TODO: is it ok to use func from repository directly in tests?
+        let settings = get_settings(&app.partition, &key)
+            .expect("Failed to fetch the setting")
+            .unwrap_or_else(|| panic!("Settings not found for key: {}", key));
 
-    assert_eq!(settings.key, key);
-    assert_eq!(settings.value, value);
-}
-
-#[tokio::test]
-async fn test_add_settings_float_ok() {
-    // Arrange
-    let app = spawn_app().await;
-    let client = reqwest::Client::new();
-
-    let key = Uuid::new_v4().to_string();
-    let value_type = "float";
-    let value = "100.5";
-
-    let body = serde_json::json!({
-        "key": key,
-        "value": value,
-        "type": value_type
-    });
-
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        "X-Api-Key",
-        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
-    );
-
-    // Act
-    let response = client
-        .post(format!("{}/api/v1/settings", &app.address))
-        .headers(headers)
-        .json(&body)
-        .send()
-        .await
-        .expect("Failed to execute request.");
-
-    // Assert
-    println!("{:?}", response);
-    assert_eq!(response.status(), 201);
-
-    let body: MessageResponse = response
-        .json()
-        .await
-        .expect("Failed to parse response body.");
-    assert_eq!(body.message, format!("Settings with key '{}' created", key));
-
-    let settings = get_settings(&app.partition, &key)
-        .expect("Failed to fetch the setting")
-        .unwrap_or_else(|| panic!("Settings not found for key: {}", key));
-
-    assert_eq!(settings.key, key);
-    assert_eq!(settings.value, value);
-}
-
-#[tokio::test]
-async fn test_add_settings_bool_ok() {
-    // Arrange
-    let app = spawn_app().await;
-    let client = reqwest::Client::new();
-
-    let key = Uuid::new_v4().to_string();
-    let value_type = "bool";
-    let value = "true";
-
-    let body = serde_json::json!({
-        "key": key,
-        "value": value,
-        "type": value_type
-    });
-
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        "X-Api-Key",
-        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
-    );
-
-    // Act
-    let response = client
-        .post(format!("{}/api/v1/settings", &app.address))
-        .json(&body)
-        .headers(headers)
-        .send()
-        .await
-        .expect("Failed to execute request.");
-
-    // Assert
-    assert_eq!(response.status(), 201);
-
-    let body: MessageResponse = response
-        .json()
-        .await
-        .expect("Failed to parse response body.");
-    assert_eq!(body.message, format!("Settings with key '{}' created", key));
-
-    let settings = get_settings(&app.partition, &key)
-        .expect("Failed to fetch the setting")
-        .unwrap_or_else(|| panic!("Settings not found for key: {}", key));
-
-    assert_eq!(settings.key, key);
-    assert_eq!(settings.value, value);
+        assert_eq!(settings.key, key);
+        assert_eq!(settings.value, value);
+    }
 }
 
 #[tokio::test]
