@@ -1,0 +1,29 @@
+# Ignore target directory (compiled Rust artifacts)
+target/
+
+# Ignore dependencies and temporary files
+**/*.rs.bk
+**/*.rlib
+
+# Ignore git and version control directories
+.git/
+.gitignore
+
+# Ignore IDE and editor configuration files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Ignore OS-specific and temporary files
+*.log
+*.tmp
+*.DS_Store
+*.bak
+*.~*
+
+# Ignore Docker-specific files
+.dockerignore
+Dockerfile

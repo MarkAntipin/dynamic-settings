@@ -33,7 +33,6 @@ pub async fn spawn_app() -> TestApp {
 
     tokio::spawn(server);
 
-    
     TestApp {
         address: format!("http://127.0.0.1:{}", port),
         partition,
