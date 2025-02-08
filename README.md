@@ -1,9 +1,14 @@
 # Dynamic Settings Service
 
 
-**Dependencies:**
+**Run With docker:**
+```
+docker build -t dynamic-settings .
+```
 
-- rust or Docker
+```
+docker run -d -p 8000:8000 -e APPLICATION_PORT=8000 -e API_KEY=api-key -v db_data:/app/db dynamic-settings
+```
 
 **Create .env with:**
 ```
