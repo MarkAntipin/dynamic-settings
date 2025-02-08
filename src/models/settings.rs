@@ -15,6 +15,7 @@ pub enum SettingsValueType {
     Int,
     Float,
     Bool,
+    Json
 }
 
 impl fmt::Display for SettingsValueType {
@@ -24,6 +25,7 @@ impl fmt::Display for SettingsValueType {
             SettingsValueType::Int => "int",
             SettingsValueType::Bool => "bool",
             SettingsValueType::Float => "float",
+            SettingsValueType::Json => "json",
         };
         write!(f, "{}", as_str)
     }
@@ -36,6 +38,8 @@ impl From<String> for SettingsValueType {
             "str" => SettingsValueType::Str,
             "bool" => SettingsValueType::Bool,
             "float" => SettingsValueType::Float,
+            "json" => SettingsValueType::Json,
+            // TODO: can forget to add a new type here
             _ => SettingsValueType::Str,
         }
     }
@@ -111,6 +115,15 @@ impl Settings {
                 self.value.parse::<f64>().map_err(|_| {
                     CustomError::ValidationError(format!(
                         "Value '{}' is not a valid float",
+                        self.value
+                    ))
+                })?;
+                Ok(())
+            }
+            SettingsValueType::Json => {
+                serde_json::from_str::<serde_json::Value>(&self.value).map_err(|_| {
+                    CustomError::ValidationError(format!(
+                        "Value '{}' is not a valid JSON",
                         self.value
                     ))
                 })?;
