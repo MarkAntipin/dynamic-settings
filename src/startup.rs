@@ -7,6 +7,7 @@ use actix_web::{
     middleware::{from_fn, Next},
     web, App, Error, HttpResponse, HttpServer,
 };
+use actix_cors::Cors;
 
 use crate::{
     errors::CustomError,
@@ -64,7 +65,11 @@ pub fn run(
     let db = web::Data::new(db);
 
     let server = HttpServer::new(move || {
+        // TODO: now allow all, but in production should be more strict
+        let cors = Cors::permissive();
+
         App::new()
+            .wrap(cors)
             .service(
                 web::scope("/api/v1/settings")
                     .wrap(from_fn(auth_middleware_new))
