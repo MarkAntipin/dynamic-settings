@@ -23,3 +23,5 @@ derive_more = "0.99.18"
 uuid = { version = "1.12.0", features = ["v4"] }
 fjall = "2.5.0"
 rmp-serde = "1.3.0"
+actix-cors = "0.7.0"
+
