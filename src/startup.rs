@@ -13,7 +13,7 @@ use env_logger::Env;
 use crate::{
     errors::CustomError,
     models::{MessageResponse, SettingsDB},
-    routes::{add_settings, get_settings, get_settings_by_key, health_check},
+    routes::{add_settings, get_settings, get_settings_by_key, delete_settings, health_check},
 };
 
 pub fn json_error_handler(cfg: &mut web::ServiceConfig) {
@@ -78,6 +78,7 @@ pub fn run(
                     .wrap(from_fn(auth_middleware_new))
                     .route("", web::post().to(add_settings))
                     .route("", web::get().to(get_settings))
+                    .route("", web::delete().to(delete_settings))
                     .route("/{key}", web::get().to(get_settings_by_key)),
             )
             .route("/health", web::get().to(health_check))

@@ -6,9 +6,9 @@ use actix_web::HttpResponse;
 
 pub async fn add_settings(
     db: web::Data<SettingsDB>,
-    settings: web::Json<Settings>,
+    payload: web::Json<Settings>,
 ) -> Result<HttpResponse, CustomError> {
-    let settings = settings.into_inner();
+    let settings = payload.into_inner();
     settings.validate()?;
 
     let key = db_add_settings(&db, &settings)?;
