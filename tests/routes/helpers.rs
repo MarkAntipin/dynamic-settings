@@ -4,6 +4,7 @@ use dynamic_settings::startup;
 use fjall::PartitionHandle;
 use fjall::{Config, PartitionCreateOptions};
 use std::net::TcpListener;
+use tokio::sync::OnceCell;
 
 pub struct TestApp {
     pub address: String,
@@ -11,7 +12,7 @@ pub struct TestApp {
     pub api_key: String,
 }
 
-pub async fn spawn_app() -> TestApp {
+async fn setup_app() -> TestApp {
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
     let port = listener.local_addr().unwrap().port();
 
@@ -38,6 +39,13 @@ pub async fn spawn_app() -> TestApp {
         partition,
         api_key: config.api_key,
     }
+}
+
+static INIT: OnceCell<TestApp> = OnceCell::const_new();
+
+// setup_app called only once
+pub async fn spawn_app() -> &'static TestApp {
+    INIT.get_or_init(setup_app).await
 }
 
 pub fn add_settings(partition: &PartitionHandle, settings: &Settings) {

@@ -9,6 +9,7 @@ use dynamic_settings::models::{Settings, SettingsValueType};
 
 #[tokio::test]
 async fn test_add_settings_ok() {
+    // TODO: use some kind of `parameterized` here
     let test_cases = vec![
         ("100", "int"),
         ("100.5", "float"),
@@ -56,7 +57,6 @@ async fn test_add_settings_ok() {
             .expect("Failed to parse response body.");
         assert_eq!(body.message, format!("Settings with key '{}' created", key));
 
-        // TODO: is it ok to use func from repository directly in tests?
         let settings = get_settings(&app.partition, &key)
             .expect("Failed to fetch the setting")
             .unwrap_or_else(|| panic!("Settings not found for key: {}", key));

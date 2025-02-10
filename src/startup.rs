@@ -4,10 +4,11 @@ use actix_web::{
     body::MessageBody,
     dev::{Server, ServiceRequest, ServiceResponse},
     error,
-    middleware::{from_fn, Next},
+    middleware::{from_fn, Next, Logger},
     web, App, Error, HttpResponse, HttpServer,
 };
 use actix_cors::Cors;
+use env_logger::Env;
 
 use crate::{
     errors::CustomError,
@@ -63,6 +64,7 @@ pub fn run(
     api_key: String,
 ) -> Result<Server, std::io::Error> {
     let db = web::Data::new(db);
+    env_logger::init_from_env(Env::default().default_filter_or("info"));
 
     let server = HttpServer::new(move || {
         // TODO: now allow all, but in production should be more strict
@@ -70,6 +72,7 @@ pub fn run(
 
         App::new()
             .wrap(cors)
+            .wrap(Logger::default())
             .service(
                 web::scope("/api/v1/settings")
                     .wrap(from_fn(auth_middleware_new))

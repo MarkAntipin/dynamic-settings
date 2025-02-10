@@ -1,6 +1,6 @@
 # Dynamic Settings Service
 
-
+## Development
 **Run With docker:**
 ```
 docker build -t dynamic-settings .
@@ -21,10 +21,9 @@ API_KEY=
 cargo clippy --all-targets --all-features
 ```
 
-[//]: # (TODO: get rid of RUST_TEST_THREADS=1)
 **Tests:**
 ```
-RUST_TEST_THREADS=1 cargo test
+cargo test
 ```
 
 **Run:**
