@@ -137,3 +137,9 @@ impl Settings {
 pub struct MessageResponse {
     pub message: String,
 }
+
+
+#[derive(Serialize, Deserialize)]
+pub struct DeleteSettingsByKeys {
+    pub keys: Vec<String>,
+}

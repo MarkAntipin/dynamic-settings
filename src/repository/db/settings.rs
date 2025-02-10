@@ -42,3 +42,15 @@ pub fn db_get_settings(db: &SettingsDB) -> Result<Vec<Settings>, fjall::Error> {
 
     Ok(settings)
 }
+
+
+pub fn db_delete_settings_by_keys(
+    db: &SettingsDB,
+    keys: Vec<String>,
+) -> Result<(), fjall::Error> {
+    for key in keys {
+        db.partition.remove(&key)?;
+    }
+    db.keyspace.persist(fjall::PersistMode::SyncAll)?;
+    Ok(())
+}

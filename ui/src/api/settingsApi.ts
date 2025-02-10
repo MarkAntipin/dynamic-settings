@@ -55,13 +55,15 @@ export const createSetting = async (setting: Settings): Promise<void> => {
 };
 
 export const deleteSettingByKey = async (key: string): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/api/v1/settings/${key}`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/settings`, {
     method: "DELETE",
+    body: JSON.stringify({ keys: [key] }),
     headers: {
       "X-Api-Key": API_KEY,
+      "Content-Type": "application/json",
     },
   });
-
+  console.log(response);
   if (!response.ok) {
     throw new Error("Failed to delete setting");
   }
