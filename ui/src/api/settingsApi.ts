@@ -1,10 +1,10 @@
 import { Settings } from "../types/settings";
 
-const API_BASE_URL = "http://localhost:8000";
-const API_KEY = "api-key";
+const API_BASE_URL = import.meta.env.VITE_API_API_URL;
+const API_KEY = import.meta.env.VITE_API_KEY;
 
 export const fetchSettings = async (): Promise<Settings[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/v1/settings`, {
+  const response = await fetch(`${API_BASE_URL}/settings`, {
     method: "GET",
     headers: {
       "X-Api-Key": API_KEY,
@@ -19,7 +19,7 @@ export const fetchSettings = async (): Promise<Settings[]> => {
 };
 
 export const fetchSettingByKey = async (key: string): Promise<Settings> => {
-  const response = await fetch(`${API_BASE_URL}/api/v1/settings/${key}`, {
+  const response = await fetch(`${API_BASE_URL}/settings/${key}`, {
     method: "GET",
     headers: {
       "X-Api-Key": API_KEY,
@@ -35,7 +35,7 @@ export const fetchSettingByKey = async (key: string): Promise<Settings> => {
 
 export const createSetting = async (setting: Settings): Promise<void> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/settings`, {
+    const response = await fetch(`${API_BASE_URL}/settings`, {
       method: "POST",
       headers: {
         "X-Api-Key": API_KEY,
@@ -55,7 +55,7 @@ export const createSetting = async (setting: Settings): Promise<void> => {
 };
 
 export const deleteSettingByKey = async (key: string): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/api/v1/settings`, {
+  const response = await fetch(`${API_BASE_URL}/settings`, {
     method: "DELETE",
     body: JSON.stringify({ keys: [key] }),
     headers: {
