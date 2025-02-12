@@ -1,4 +1,4 @@
-FROM rust:1.83-slim-bullseye AS builder
+FROM rust:1.83-slim-bullseye AS backend-builder
 
 WORKDIR /usr/src/app
 
@@ -12,10 +12,19 @@ RUN apt-get update -y \
 
 RUN cargo build --release --bin dynamic_settings
 
+FROM node:18-bullseye-slim AS frontend-builder
+
+WORKDIR /app/ui
+
+COPY ui ./
+
+RUN npm install && npm run build
+
 FROM debian:bullseye-slim
 
 WORKDIR /app
 
-COPY --from=builder /usr/src/app/target/release/dynamic_settings .
+COPY --from=backend-builder /usr/src/app/target/release/dynamic_settings .
+COPY --from=frontend-builder /app/ui/dist /app/ui/dist
 
 CMD ["./dynamic_settings"]

@@ -5,9 +5,10 @@ use actix_web::{
     dev::{Server, ServiceRequest, ServiceResponse},
     error,
     middleware::{from_fn, Next, Logger},
-    web, App, Error, HttpResponse, HttpServer,
+    web, App, Error, HttpResponse, HttpServer
 };
 use actix_cors::Cors;
+use actix_files;
 use env_logger::Env;
 
 use crate::{
@@ -70,7 +71,7 @@ pub fn run(
         // TODO: now allow all, but in production should be more strict
         let cors = Cors::permissive();
 
-        App::new()
+        let mut app = App::new()
             .wrap(cors)
             .wrap(Logger::default())
             .service(
@@ -84,7 +85,12 @@ pub fn run(
             .route("/health", web::get().to(health_check))
             .app_data(api_key.clone())
             .app_data(db.clone())
-            .configure(json_error_handler)
+            .configure(json_error_handler);
+
+        if !cfg!(debug_assertions) {
+            app = app.service(actix_files::Files::new("/", "./ui/dist").index_file("index.html"));
+        }
+        app
     })
     .listen(listener)?
     .run();
