@@ -138,8 +138,12 @@ pub struct MessageResponse {
     pub message: String,
 }
 
-
 #[derive(Serialize, Deserialize)]
 pub struct DeleteSettingsByKeys {
     pub keys: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ValidateTokenRequest {
+    pub token: String,
 }

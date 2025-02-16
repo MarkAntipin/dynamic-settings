@@ -62,3 +62,65 @@ async fn test_auth_invalid_api_key_header() {
 
     assert_eq!(body.message, "invalid `X-Api-Key` header");
 }
+
+
+#[tokio::test]
+async fn test_validate_token_invalid_token() {
+    // Arrange
+    let app = spawn_app().await;
+    let client = reqwest::Client::new();
+
+    // not valid api key
+    let body = serde_json::json!({
+        "token": format!("{}:not-valid", app.api_key)
+    });
+
+    // Act
+    let response = client
+        .post(format!("{}/api/v1/auth/validate-token", &app.address))
+        .json(&body)
+        .send()
+        .await
+        .expect("Failed to execute request.");
+
+    // Assert
+    assert_eq!(response.status(), 403);
+
+    let body: MessageResponse = response
+        .json()
+        .await
+        .expect("Failed to parse response body.");
+
+    assert_eq!(body.message, "Invalid token");
+}
+
+
+#[tokio::test]
+async fn test_validate_token_ok() {
+    // Arrange
+    let app = spawn_app().await;
+    let client = reqwest::Client::new();
+
+    // not valid api key
+    let body = serde_json::json!({
+        "token": app.api_key
+    });
+
+    // Act
+    let response = client
+        .post(format!("{}/api/v1/auth/validate-token", &app.address))
+        .json(&body)
+        .send()
+        .await
+        .expect("Failed to execute request.");
+
+    // Assert
+    assert_eq!(response.status(), 200);
+
+    let body: MessageResponse = response
+        .json()
+        .await
+        .expect("Failed to parse response body.");
+
+    assert_eq!(body.message, "Token is valid");
+}

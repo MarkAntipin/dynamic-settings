@@ -10,6 +10,7 @@ pub enum CustomError {
     ValidationError(String),
     InternalError(String),
     UnauthorizedError(String),
+    ForbiddenError(String),
     NotFoundError(String),
 }
 
@@ -32,6 +33,7 @@ impl ResponseError for CustomError {
             CustomError::ValidationError(_) => StatusCode::UNPROCESSABLE_ENTITY,
             CustomError::InternalError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             CustomError::UnauthorizedError(_) => StatusCode::UNAUTHORIZED,
+            CustomError::ForbiddenError(_) => StatusCode::FORBIDDEN,
             CustomError::NotFoundError(_) => StatusCode::NOT_FOUND,
         }
     }
@@ -44,6 +46,7 @@ impl ResponseError for CustomError {
             | CustomError::ValidationError(message)
             | CustomError::InternalError(message)
             | CustomError::UnauthorizedError(message)
+            | CustomError::ForbiddenError(message)
             | CustomError::NotFoundError(message) => {
                 HttpResponse::build(status).body(ErrorResponse::to_json(message))
             }
