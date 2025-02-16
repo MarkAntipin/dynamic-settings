@@ -27,9 +27,6 @@ const AuthTokenPage: React.FC = () => {
     }
   };
 
-  if (loading) return <p className="text-gray-600 text-center">Validating...</p>;
-  if (error) return <p className="text-red-500 text-center">Error: {error}</p>;
-
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-xl font-semibold mb-4 text-center">
@@ -54,8 +51,8 @@ const AuthTokenPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Display Backend Error */}
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {/* Display Backend Error at the Bottom */}
+      {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
     </div>
   );
 };
