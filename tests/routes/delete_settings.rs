@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use reqwest::header::{HeaderMap, HeaderValue};
 
-use crate::helpers::{add_settings, get_settings, spawn_app};
+use crate::helpers::{create_settings, get_settings, spawn_app};
 use dynamic_settings::models::{Settings, SettingsValueType};
 
 #[tokio::test]
@@ -20,7 +20,7 @@ async fn test_deleted_settings() {
         value_type: SettingsValueType::Int,
     };
 
-    add_settings(&app.partition, &settings);
+    create_settings(&app.partition, &settings);
 
     let body = serde_json::json!({
         "keys": [key]

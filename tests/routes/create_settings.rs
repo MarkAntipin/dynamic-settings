@@ -2,13 +2,13 @@ use uuid::Uuid;
 
 use reqwest::header::{HeaderMap, HeaderValue};
 
-use crate::helpers::{add_settings, get_settings, spawn_app};
+use crate::helpers::{create_settings, get_settings, spawn_app};
 use dynamic_settings::models::MessageResponse;
 use dynamic_settings::models::{Settings, SettingsValueType};
 
 
 #[tokio::test]
-async fn test_add_settings_ok() {
+async fn test_create_settings_ok() {
     // TODO: use some kind of `parameterized` here
     let test_cases = vec![
         ("100", "int"),
@@ -67,7 +67,7 @@ async fn test_add_settings_ok() {
 }
 
 #[tokio::test]
-async fn test_add_settings_int_invalid() {
+async fn test_create_settings_int_invalid() {
     // Arrange
     let app = spawn_app().await;
     let client = reqwest::Client::new();
@@ -108,7 +108,7 @@ async fn test_add_settings_int_invalid() {
 }
 
 #[tokio::test]
-async fn test_add_settings_key_already_exists() {
+async fn test_create_settings_key_already_exists() {
     // Arrange
     let app = spawn_app().await;
     let client = reqwest::Client::new();
@@ -123,7 +123,7 @@ async fn test_add_settings_key_already_exists() {
         value_type: SettingsValueType::Int,
     };
 
-    add_settings(&app.partition, &settings);
+    create_settings(&app.partition, &settings);
 
     let body = serde_json::json!({
         "key": key,
@@ -160,7 +160,7 @@ async fn test_add_settings_key_already_exists() {
 }
 
 #[tokio::test]
-async fn test_add_settings_invalid_input_missing_type() {
+async fn test_create_settings_invalid_input_missing_type() {
     // Arrange
     let app = spawn_app().await;
     let client = reqwest::Client::new();
@@ -200,7 +200,7 @@ async fn test_add_settings_invalid_input_missing_type() {
 }
 
 #[tokio::test]
-async fn test_add_settings_invalid_input_key_is_to_big() {
+async fn test_create_settings_invalid_input_key_is_to_big() {
     // Arrange
     let app = spawn_app().await;
     let client = reqwest::Client::new();

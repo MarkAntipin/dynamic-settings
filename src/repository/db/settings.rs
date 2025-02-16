@@ -2,7 +2,7 @@ use fjall;
 
 use crate::models::{Settings, SettingsDB};
 
-pub fn db_add_settings(
+pub fn db_create_settings(
     db: &SettingsDB,
     settings: &Settings,
 ) -> Result<Option<String>, fjall::Error> {

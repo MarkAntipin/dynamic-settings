@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use reqwest::header::{HeaderMap, HeaderValue};
 
-use crate::helpers::{add_settings, spawn_app};
+use crate::helpers::{create_settings, spawn_app};
 use dynamic_settings::models::{MessageResponse, Settings, SettingsValueType};
 
 #[tokio::test]
@@ -20,7 +20,7 @@ async fn test_get_settings_by_key_ok() {
         value_type: SettingsValueType::Int,
     };
 
-    add_settings(&app.partition, &settings);
+    create_settings(&app.partition, &settings);
 
     let mut headers = HeaderMap::new();
     headers.insert(

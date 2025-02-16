@@ -48,7 +48,7 @@ pub async fn spawn_app() -> &'static TestApp {
     INIT.get_or_init(setup_app).await
 }
 
-pub fn add_settings(partition: &PartitionHandle, settings: &Settings) {
+pub fn create_settings(partition: &PartitionHandle, settings: &Settings) {
     let key = &settings.key;
     let serialized: Vec<u8> = settings.into();
     partition
