@@ -1,27 +1,27 @@
-use crate::errors::CustomError;
-use crate::models::{MessageResponse, Settings, SettingsDB};
-use crate::repository::db_create_settings;
 use actix_web::web;
 use actix_web::HttpResponse;
 
+use crate::errors::CustomError;
+use crate::models::{MessageResponse, SettingsRequest, SettingsDBRow, SettingsDB};
+use crate::repository::db_create_settings;
+
 pub async fn create_settings(
     db: web::Data<SettingsDB>,
-    payload: web::Json<Settings>,
+    payload: web::Json<SettingsRequest>,
 ) -> Result<HttpResponse, CustomError> {
     let settings = payload.into_inner();
     settings.validate()?;
 
-    let key = db_create_settings(&db, &settings)?;
+    let settings_row: SettingsDBRow = settings.into();
+    let key = db_create_settings(&db, &settings_row)?;
 
     if key.is_none() {
-        let response = MessageResponse {
-            message: format!("Settings with key '{}' already exist", settings.key),
-        };
-        Ok(HttpResponse::Conflict().json(response))
-    } else {
-        let response = MessageResponse {
-            message: format!("Settings with key '{}' created", settings.key),
-        };
-        Ok(HttpResponse::Created().json(response))
+        return Err(CustomError::ConflictError(
+            format!("Settings with key '{}' already exist", settings_row.key)
+        ))
     }
+    let response = MessageResponse {
+        message: format!("Settings with key '{}' created", settings_row.key),
+    };
+    Ok(HttpResponse::Created().json(response))
 }

@@ -1,9 +1,11 @@
 use uuid::Uuid;
 
+use chrono::Utc;
 use reqwest::header::{HeaderMap, HeaderValue};
 
 use crate::helpers::{create_settings, get_settings, spawn_app};
-use dynamic_settings::models::{Settings, SettingsValueType};
+use dynamic_settings::models::{SettingsDBRow};
+use dynamic_settings::enums::SettingsValueType;
 
 #[tokio::test]
 async fn test_deleted_settings() {
@@ -14,10 +16,11 @@ async fn test_deleted_settings() {
     let key = Uuid::new_v4().to_string();
     let value = "100".to_string();
 
-    let settings = Settings {
+    let settings = SettingsDBRow {
         key: key.clone(),
         value: value.clone(),
         value_type: SettingsValueType::Int,
+        created_at: Utc::now()
     };
 
     create_settings(&app.partition, &settings);

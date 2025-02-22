@@ -1,9 +1,11 @@
 use uuid::Uuid;
 
+use chrono::Utc;
 use reqwest::header::{HeaderMap, HeaderValue};
 
 use crate::helpers::{create_settings, spawn_app};
-use dynamic_settings::models::{MessageResponse, Settings, SettingsValueType};
+use dynamic_settings::models::{MessageResponse, SettingsDBRow};
+use dynamic_settings::enums::SettingsValueType;
 
 #[tokio::test]
 async fn test_get_settings_by_key_ok() {
@@ -14,10 +16,11 @@ async fn test_get_settings_by_key_ok() {
     let key = Uuid::new_v4().to_string();
     let value = "100".to_string();
 
-    let settings = Settings {
+    let settings = SettingsDBRow {
         key: key.clone(),
         value: value.clone(),
         value_type: SettingsValueType::Int,
+        created_at: Utc::now(),
     };
 
     create_settings(&app.partition, &settings);
@@ -39,7 +42,7 @@ async fn test_get_settings_by_key_ok() {
     // Assert
     assert_eq!(response.status(), 200);
 
-    let body: Settings = response
+    let body: SettingsDBRow = response
         .json()
         .await
         .expect("Failed to parse response body.");

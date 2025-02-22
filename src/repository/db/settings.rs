@@ -1,15 +1,15 @@
 use fjall;
 
-use crate::models::{Settings, SettingsDB};
+use crate::models::{SettingsDBRow, SettingsDB};
 
 pub fn db_create_settings(
     db: &SettingsDB,
-    settings: &Settings,
+    settings_row: &SettingsDBRow,
 ) -> Result<Option<String>, fjall::Error> {
-    let key = &settings.key;
+    let key = &settings_row.key;
 
     let Some(_) = db.partition.get(key)? else {
-        let serialized: Vec<u8> = settings.into();
+        let serialized: Vec<u8> = settings_row.into();
         db.partition
             .insert(key, serialized)
             .expect("Failed to insert settings");
@@ -23,22 +23,22 @@ pub fn db_create_settings(
 pub fn db_get_settings_by_key(
     db: &SettingsDB,
     key: &str,
-) -> Result<Option<Settings>, fjall::Error> {
+) -> Result<Option<SettingsDBRow>, fjall::Error> {
     let Some(item) = db.partition.get(key)? else {
         return Ok(None);
     };
 
-    let settings: Settings =
+    let settings: SettingsDBRow =
         rmp_serde::from_slice(&item).expect("Error deserializing settings from bytes");
     Ok(Some(settings))
 }
 
-pub fn db_get_settings(db: &SettingsDB) -> Result<Vec<Settings>, fjall::Error> {
+pub fn db_get_settings(db: &SettingsDB) -> Result<Vec<SettingsDBRow>, fjall::Error> {
     let settings = db
         .partition
         .iter()
-        .map(|item| item.map(Settings::from))
-        .collect::<Result<Vec<Settings>, _>>()?;
+        .map(|item| item.map(SettingsDBRow::from))
+        .collect::<Result<Vec<SettingsDBRow>, _>>()?;
 
     Ok(settings)
 }

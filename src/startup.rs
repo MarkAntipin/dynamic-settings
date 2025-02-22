@@ -3,9 +3,8 @@ use std::net::TcpListener;
 use actix_web::{
     body::MessageBody,
     dev::{Server, ServiceRequest, ServiceResponse},
-    error,
     middleware::{from_fn, Next, Logger},
-    web, App, Error, HttpResponse, HttpServer
+    web, App, Error, HttpServer
 };
 use actix_cors::Cors;
 use actix_files;
@@ -13,7 +12,7 @@ use env_logger::Env;
 
 use crate::{
     errors::CustomError,
-    models::{MessageResponse, SettingsDB},
+    models::SettingsDB,
     routes::{create_settings, get_settings, get_settings_by_key, delete_settings, health_check, validate_token},
 };
 
@@ -31,7 +30,7 @@ pub fn json_error_handler(cfg: &mut web::ServiceConfig) {
     }));
 }
 
-async fn auth_middleware_new(
+async fn auth_middleware(
     req: ServiceRequest,
     next: Next<impl MessageBody>,
 ) -> Result<ServiceResponse<impl MessageBody>, Error> {
@@ -39,22 +38,12 @@ async fn auth_middleware_new(
     let api_key_header = headers.get("X-Api-Key");
 
     if api_key_header.is_none() {
-        // TODO: how to use custom error? `InternalError` looks redundant
-        let error_body = MessageResponse {
-            message: "missing `X-Api-Key` header".to_string(),
-        };
-        let error_response = HttpResponse::Unauthorized().json(error_body);
-        return Err(error::InternalError::from_response("Unauthorized", error_response).into());
+        return Err(CustomError::UnauthorizedError("missing `X-Api-Key` header".to_string()).into());
     }
 
     let expected_api_key = req.app_data::<web::Data<String>>().unwrap();
     if api_key_header.unwrap().to_str().unwrap() != expected_api_key.to_string() {
-        // TODO: how to use custom error? `InternalError` looks redundant
-        let error_body = MessageResponse {
-            message: "invalid `X-Api-Key` header".to_string(),
-        };
-        let error_response = HttpResponse::Forbidden().json(error_body);
-        return Err(error::InternalError::from_response("Forbidden", error_response).into());
+        return Err(CustomError::ForbiddenError("invalid `X-Api-Key` header".to_string()).into());
     }
     next.call(req).await
 }
@@ -79,7 +68,7 @@ pub fn run(
                 web::scope("/api/v1")
                 .service(
                     web::scope("/settings")
-                        .wrap(from_fn(auth_middleware_new))
+                        .wrap(from_fn(auth_middleware))
                         .route("", web::post().to(create_settings))
                         .route("", web::get().to(get_settings))
                         .route("", web::delete().to(delete_settings))

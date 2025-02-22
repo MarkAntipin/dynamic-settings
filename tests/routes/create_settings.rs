@@ -1,10 +1,12 @@
 use uuid::Uuid;
 
+use chrono::Utc;
 use reqwest::header::{HeaderMap, HeaderValue};
 
 use crate::helpers::{create_settings, get_settings, spawn_app};
 use dynamic_settings::models::MessageResponse;
-use dynamic_settings::models::{Settings, SettingsValueType};
+use dynamic_settings::models::SettingsDBRow;
+use dynamic_settings::enums::SettingsValueType;
 
 
 #[tokio::test]
@@ -117,10 +119,11 @@ async fn test_create_settings_key_already_exists() {
     let value_type = "int";
     let value = "100".to_string();
 
-    let settings = Settings {
+    let settings = SettingsDBRow {
         key: key.clone(),
         value: value.clone(),
         value_type: SettingsValueType::Int,
+        created_at: Utc::now(),
     };
 
     create_settings(&app.partition, &settings);
