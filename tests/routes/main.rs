@@ -1,4 +1,4 @@
-mod add_settings;
+mod create_settings;
 mod auth;
 mod get_settings_by_key;
 mod delete_settings;

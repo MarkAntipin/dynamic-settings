@@ -1,81 +1,37 @@
-use std::fmt;
-
 use fjall::{UserKey, UserValue};
 use serde::{Deserialize, Serialize};
 
 use crate::errors::CustomError;
+use crate::enums::SettingsValueType;
 
 const MAX_KEY_LENGTH: usize = 1024;
 const MAX_VALUE_LENGTH: usize = 65536;
 
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "lowercase")]
-pub enum SettingsValueType {
-    Str,
-    Int,
-    Float,
-    Bool,
-    Json
-}
-
-impl fmt::Display for SettingsValueType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let as_str = match self {
-            SettingsValueType::Str => "str",
-            SettingsValueType::Int => "int",
-            SettingsValueType::Bool => "bool",
-            SettingsValueType::Float => "float",
-            SettingsValueType::Json => "json",
-        };
-        write!(f, "{}", as_str)
-    }
-}
-
-impl From<String> for SettingsValueType {
-    fn from(value: String) -> Self {
-        match value.as_str() {
-            "int" => SettingsValueType::Int,
-            "str" => SettingsValueType::Str,
-            "bool" => SettingsValueType::Bool,
-            "float" => SettingsValueType::Float,
-            "json" => SettingsValueType::Json,
-            // TODO: can forget to add a new type here
-            _ => SettingsValueType::Str,
-        }
-    }
-}
-
 #[derive(Serialize, Deserialize)]
-pub struct Settings {
+pub struct SettingsRequest {
     pub key: String,
     pub value: String,
     #[serde(rename = "type")]
     pub value_type: SettingsValueType,
 }
 
-impl From<&Settings> for Vec<u8> {
-    fn from(val: &Settings) -> Self {
+impl From<&SettingsRequest> for Vec<u8> {
+    fn from(val: &SettingsRequest) -> Self {
         rmp_serde::to_vec(&val).expect("Error serializing settings to bytes")
     }
 }
 
-impl From<(UserKey, UserValue)> for Settings {
+impl From<(UserKey, UserValue)> for SettingsRequest {
     fn from((key, value): (UserKey, UserValue)) -> Self {
         let key = std::str::from_utf8(&key).unwrap();
-        let mut item: Settings =
+        let mut item: SettingsRequest =
             rmp_serde::from_slice(&value).expect("Error deserializing settings from bytes");
         key.clone_into(&mut item.key);
         item
     }
 }
 
-impl fmt::Display for Settings {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} - {}, {}", self.key, self.value, self.value_type)
-    }
-}
-
-impl Settings {
+impl SettingsRequest {
     pub fn validate(&self) -> Result<(), CustomError> {
         if self.key.len() > MAX_KEY_LENGTH {
             return Err(CustomError::ValidationError(format!(
@@ -134,12 +90,7 @@ impl Settings {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct MessageResponse {
-    pub message: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct DeleteSettingsByKeys {
+pub struct DeleteSettingsByKeysRequest {
     pub keys: Vec<String>,
 }
 

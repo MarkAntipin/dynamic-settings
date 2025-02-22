@@ -12,6 +12,7 @@ pub enum CustomError {
     UnauthorizedError(String),
     ForbiddenError(String),
     NotFoundError(String),
+    ConflictError(String),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -35,6 +36,7 @@ impl ResponseError for CustomError {
             CustomError::UnauthorizedError(_) => StatusCode::UNAUTHORIZED,
             CustomError::ForbiddenError(_) => StatusCode::FORBIDDEN,
             CustomError::NotFoundError(_) => StatusCode::NOT_FOUND,
+            CustomError::ConflictError(_) => StatusCode::CONFLICT,
         }
     }
 
@@ -47,6 +49,7 @@ impl ResponseError for CustomError {
             | CustomError::InternalError(message)
             | CustomError::UnauthorizedError(message)
             | CustomError::ForbiddenError(message)
+            | CustomError::ConflictError(message)
             | CustomError::NotFoundError(message) => {
                 HttpResponse::build(status).body(ErrorResponse::to_json(message))
             }

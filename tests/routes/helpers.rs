@@ -1,5 +1,5 @@
 use dynamic_settings::config::get_config;
-use dynamic_settings::models::{Settings, SettingsDB};
+use dynamic_settings::models::{SettingsDBRow, SettingsDB};
 use dynamic_settings::startup;
 use fjall::PartitionHandle;
 use fjall::{Config, PartitionCreateOptions};
@@ -48,7 +48,7 @@ pub async fn spawn_app() -> &'static TestApp {
     INIT.get_or_init(setup_app).await
 }
 
-pub fn add_settings(partition: &PartitionHandle, settings: &Settings) {
+pub fn create_settings(partition: &PartitionHandle, settings: &SettingsDBRow) {
     let key = &settings.key;
     let serialized: Vec<u8> = settings.into();
     partition
@@ -59,12 +59,12 @@ pub fn add_settings(partition: &PartitionHandle, settings: &Settings) {
 pub fn get_settings(
     partition: &PartitionHandle,
     key: &str,
-) -> Result<Option<Settings>, fjall::Error> {
+) -> Result<Option<SettingsDBRow>, fjall::Error> {
     let Some(item) = partition.get(key)? else {
         return Ok(None);
     };
 
-    let settings: Settings =
+    let settings: SettingsDBRow =
         rmp_serde::from_slice(&item).expect("Error deserializing settings from bytes");
     Ok(Some(settings))
 }
