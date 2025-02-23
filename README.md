@@ -1,43 +1,75 @@
-# Dynamic Settings Service
+# ⚙️️ Dynamic Settings
 
-**Run With docker:**
+**Dynamic Settings** is a lightweight, real-time configuration management service
+that allows you to store and update settings dynamically without redeploying your application.
+It provides a web-based UI and an API to manage key-value pairs efficiently.
+
+![Dynamic Settings UI](docs/images/settings-screen.png)
+---
+
+## 🚀 Quick setup
+```
+docker pull markantipin12/dynamic-settings
+
+docker run -d -p 18100:18100 markantipin12/dynamic-settings
+
+open http://localhost:18100
+```
+
+### Environment Variables
+```
+APPLICATION_PORT=18100	# The port on which the application will run
+API_KEY=api-key # The API key to access the API
+```
+
+
+## ✨ Why Dynamic Settings?
+
+- 🦀 **Built with Rust** – Designed for speed, safety, and low resource consumption.
+- 🔧 **Live Configuration Updates** – Modify settings in real-time without restarting your application.
+- 🏗️ **API-Driven** – A RESTful API for programmatic access to settings.
+- 🖥️ **User-Friendly UI** – Manage settings through an intuitive web interface.
+
+---
+
+
+## 🛠 Development
+### With docker
 ```
 docker build -t dynamic-settings .
+
+docker run -d -p 18100:18100 dynamic-settings
 ```
 
+### Without docker
+#### Backend
+**Run**
 ```
-docker run -d -p 18100:18100 -v db_data:/app/db dynamic-settings
+cargo run
 ```
-
-
+**Test**
 ```
-APPLICATION_PORT=18100
-API_KEY=api-key
+cargo test
 ```
-
-
-## Development
-### Backend
-**Create .env with:**
-```
-APPLICATION_PORT=
-API_KEY=
-```
-
-**Linters:**
+**Linter**
 ```
 cargo clippy --all-targets --all-features
 ```
 
-**Tests:**
+#### Frontend (ui folder)
+**Install dependencies**
 ```
-cargo test
+npm install
 ```
-
-**Run:**
+**Run**
 ```
-cargo run
+npm start
 ```
-### Frontend
-**Create .env with:**
+**Build**
+```
+npm run build
+```
+**Linter**
+```
+npm run lint
 ```
