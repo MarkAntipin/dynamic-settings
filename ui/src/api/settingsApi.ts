@@ -49,9 +49,9 @@ export const createSetting = async (setting: Settings): Promise<void> => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => null); // Try parsing JSON
+      const errorData = await response.json().catch(() => null);
       const errorMessage = errorData?.message || `Failed to create setting (Status: ${response.status})`;
-      throw new Error(errorMessage); // Correctly throwing the string error message
+      throw new Error(errorMessage);
     }
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : "An unexpected error occurred");
@@ -64,7 +64,6 @@ export const deleteSettingByKey = async (key: string): Promise<void> => {
     body: JSON.stringify({ keys: [key] }),
     headers: getAuthHeader(),
   });
-  console.log(response);
   if (!response.ok) {
     throw new Error("Failed to delete setting");
   }

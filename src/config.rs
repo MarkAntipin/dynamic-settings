@@ -12,7 +12,7 @@ pub struct Config {
 }
 
 fn default_application_port() -> u16 {
-    8000
+    18100
 }
 
 fn default_api_key() -> String {
