@@ -1,9 +1,12 @@
+use std::option::Option;
+
 use dynamic_settings::config::get_config;
 use dynamic_settings::models::{SettingsDBRow, SettingsDB};
 use dynamic_settings::startup;
 use fjall::PartitionHandle;
 use fjall::{Config, PartitionCreateOptions};
 use std::net::TcpListener;
+use reqwest::header::{HeaderMap, HeaderValue};
 use tokio::sync::OnceCell;
 
 pub struct TestApp {
@@ -47,6 +50,37 @@ static INIT: OnceCell<TestApp> = OnceCell::const_new();
 pub async fn spawn_app() -> &'static TestApp {
     INIT.get_or_init(setup_app).await
 }
+
+
+pub async fn make_request(
+    url: String,
+    api_key: String,
+    body: Option<serde_json::Value>,
+    method: reqwest::Method,
+) -> reqwest::Response {
+    let client = reqwest::Client::new();
+    let mut headers = HeaderMap::new();
+
+    headers.insert(
+        "X-Api-Key",
+        HeaderValue::from_str(&api_key).expect("Failed to add header"),
+    );
+    let request_builder = client
+        .request(method, url)
+        .headers(headers);
+
+    let request_builder = if let Some(json_body) = body {
+        request_builder.json(&json_body)
+    } else {
+        request_builder
+    };
+
+    request_builder
+        .send()
+        .await
+        .expect("Failed to execute request.")
+}
+
 
 pub fn create_settings(partition: &PartitionHandle, settings: &SettingsDBRow) {
     let key = &settings.key;
