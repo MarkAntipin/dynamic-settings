@@ -1,19 +1,19 @@
-FROM rust:1.83-slim-bullseye AS backend-builder
+FROM rust:1.83-alpine AS backend-builder
 
 WORKDIR /usr/src/app
 
-COPY . .
+RUN apk add --no-cache \
+    build-base \
+    musl-dev \
+    linux-headers \
+    pkgconfig \
+    openssl-dev
 
-RUN apt-get update -y \
-    && apt-get upgrade -y \
-    && apt-get install -y --no-install-recommends pkg-config libssl-dev \
-    && apt-get autoremove -y \
-    && apt-get clean -y \
-    && rm -rf /var/lib/apt/lists/*
+COPY . .
 
 RUN cargo build --release --bin dynamic_settings
 
-FROM node:18-bullseye-slim AS frontend-builder
+FROM node:18-alpine AS frontend-builder
 
 WORKDIR /app/ui
 
@@ -21,7 +21,7 @@ COPY ui ./
 
 RUN npm install && npm run build
 
-FROM debian:bullseye-slim
+FROM alpine
 
 WORKDIR /app
 
