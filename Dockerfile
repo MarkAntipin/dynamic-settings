@@ -5,6 +5,7 @@ WORKDIR /usr/src/app
 COPY . .
 
 RUN apt-get update -y \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends pkg-config libssl-dev \
     && apt-get autoremove -y \
     && apt-get clean -y \
