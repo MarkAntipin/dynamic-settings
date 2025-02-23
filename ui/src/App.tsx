@@ -29,7 +29,6 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/auth-token" element={<AuthTokenPage />} />
-        {/*<Route path="/" element={<Navigate to="/settings" replace />} />*/}
         <Route path="/settings" element={<ProtectedRoute element={<SettingsListPage />} />} />
         <Route path="/settings/create" element={<ProtectedRoute element={<CreateSettingsPage />} />} />
         <Route path="/settings/:key" element={<ProtectedRoute element={<ManageSettingsPage />} />} />
