@@ -1,9 +1,8 @@
 use uuid::Uuid;
 
 use chrono::Utc;
-use reqwest::header::{HeaderMap, HeaderValue};
 
-use crate::helpers::{create_settings, get_settings, spawn_app};
+use crate::helpers::{create_settings, get_settings, spawn_app, make_request};
 use dynamic_settings::models::MessageResponse;
 use dynamic_settings::models::SettingsDBRow;
 use dynamic_settings::enums::SettingsValueType;
@@ -23,7 +22,6 @@ async fn test_create_settings_ok() {
 
     // Arrange
     let app = spawn_app().await;
-    let client = reqwest::Client::new();
 
     for (value, value_type) in test_cases {
         // Arrange
@@ -35,20 +33,13 @@ async fn test_create_settings_ok() {
             "type": value_type
         });
 
-        let mut headers = HeaderMap::new();
-        headers.insert(
-            "X-Api-Key",
-            HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
-        );
-
         // Act
-        let response = client
-            .post(format!("{}/api/v1/settings", &app.address))
-            .json(&body)
-            .headers(headers)
-            .send()
-            .await
-            .expect("Failed to execute request.");
+        let response = make_request(
+            format!("{}/api/v1/settings", &app.address),
+            app.api_key.clone(),
+            Some(body),
+            reqwest::Method::POST,
+        ).await;
 
         // Assert
         assert_eq!(response.status(), 201);
@@ -72,7 +63,6 @@ async fn test_create_settings_ok() {
 async fn test_create_settings_int_invalid() {
     // Arrange
     let app = spawn_app().await;
-    let client = reqwest::Client::new();
 
     let key = Uuid::new_v4().to_string();
     let value_type = "int";
@@ -84,20 +74,13 @@ async fn test_create_settings_int_invalid() {
         "type": value_type
     });
 
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        "X-Api-Key",
-        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
-    );
-
     // Act
-    let response = client
-        .post(format!("{}/api/v1/settings", &app.address))
-        .json(&body)
-        .headers(headers)
-        .send()
-        .await
-        .expect("Failed to execute request.");
+    let response = make_request(
+        format!("{}/api/v1/settings", &app.address),
+        app.api_key.clone(),
+        Some(body),
+        reqwest::Method::POST,
+    ).await;
 
     // Assert
     assert_eq!(response.status(), 422);
@@ -113,7 +96,6 @@ async fn test_create_settings_int_invalid() {
 async fn test_create_settings_key_already_exists() {
     // Arrange
     let app = spawn_app().await;
-    let client = reqwest::Client::new();
 
     let key = Uuid::new_v4().to_string();
     let value_type = "int";
@@ -134,20 +116,13 @@ async fn test_create_settings_key_already_exists() {
         "type": value_type
     });
 
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        "X-Api-Key",
-        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
-    );
-
     // Act
-    let response = client
-        .post(format!("{}/api/v1/settings", &app.address))
-        .json(&body)
-        .headers(headers)
-        .send()
-        .await
-        .expect("Failed to execute request.");
+    let response = make_request(
+        format!("{}/api/v1/settings", &app.address),
+        app.api_key.clone(),
+        Some(body),
+        reqwest::Method::POST,
+    ).await;
 
     // Assert
     assert_eq!(response.status(), 409);
@@ -166,7 +141,6 @@ async fn test_create_settings_key_already_exists() {
 async fn test_create_settings_invalid_input_missing_type() {
     // Arrange
     let app = spawn_app().await;
-    let client = reqwest::Client::new();
 
     let key = Uuid::new_v4().to_string();
     let value = "invalid";
@@ -177,20 +151,13 @@ async fn test_create_settings_invalid_input_missing_type() {
         // missing type
     });
 
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        "X-Api-Key",
-        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
-    );
-
     // Act
-    let response = client
-        .post(format!("{}/api/v1/settings", &app.address))
-        .json(&body)
-        .headers(headers)
-        .send()
-        .await
-        .expect("Failed to execute request.");
+    let response = make_request(
+        format!("{}/api/v1/settings", &app.address),
+        app.api_key.clone(),
+        Some(body),
+        reqwest::Method::POST,
+    ).await;
 
     // Assert
     assert_eq!(response.status(), 422);
@@ -206,31 +173,23 @@ async fn test_create_settings_invalid_input_missing_type() {
 async fn test_create_settings_invalid_input_key_is_to_big() {
     // Arrange
     let app = spawn_app().await;
-    let client = reqwest::Client::new();
 
     let value_type = "int";
     let value = "100";
 
-    // Act
     let body = serde_json::json!({
         "key": "a".repeat(10000),
         "value": value,
         "type": value_type
     });
 
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        "X-Api-Key",
-        HeaderValue::from_str(&app.api_key).expect("Failed to add header"),
-    );
-
-    let response = client
-        .post(format!("{}/api/v1/settings", &app.address))
-        .json(&body)
-        .headers(headers)
-        .send()
-        .await
-        .expect("Failed to execute request.");
+    // Act
+    let response = make_request(
+        format!("{}/api/v1/settings", &app.address),
+        app.api_key.clone(),
+        Some(body),
+        reqwest::Method::POST,
+    ).await;
 
     // Assert
     assert_eq!(response.status(), 422);

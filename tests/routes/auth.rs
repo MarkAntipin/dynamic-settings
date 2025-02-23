@@ -1,8 +1,6 @@
 use uuid::Uuid;
 
-use reqwest::header::{HeaderMap, HeaderValue};
-
-use crate::helpers::spawn_app;
+use crate::helpers::{spawn_app, make_request};
 use dynamic_settings::models::MessageResponse;
 
 #[tokio::test]
@@ -34,23 +32,16 @@ async fn test_auth_no_api_key_header() {
 async fn test_auth_invalid_api_key_header() {
     // Arrange
     let app = spawn_app().await;
-    let client = reqwest::Client::new();
     let key = Uuid::new_v4().to_string();
 
-    let mut headers = HeaderMap::new();
-    // not valid api key
-    headers.insert(
-        "X-Api-Key",
-        HeaderValue::from_str(&format!("{}:not-valid", app.api_key)).expect("Failed to add header"),
-    );
-
     // Act
-    let response = client
-        .get(format!("{}/api/v1/settings/{}", &app.address, key))
-        .headers(headers)
-        .send()
-        .await
-        .expect("Failed to execute request.");
+    let response = make_request(
+        format!("{}/api/v1/settings/{}", &app.address, key),
+        // not valid api key
+        format!("{}:not-valid", app.api_key),
+        None,
+        reqwest::Method::GET,
+    ).await;
 
     // Assert
     assert_eq!(response.status(), 403);
@@ -68,7 +59,6 @@ async fn test_auth_invalid_api_key_header() {
 async fn test_validate_token_invalid_token() {
     // Arrange
     let app = spawn_app().await;
-    let client = reqwest::Client::new();
 
     // not valid api key
     let body = serde_json::json!({
@@ -76,12 +66,12 @@ async fn test_validate_token_invalid_token() {
     });
 
     // Act
-    let response = client
-        .post(format!("{}/api/v1/auth/validate-token", &app.address))
-        .json(&body)
-        .send()
-        .await
-        .expect("Failed to execute request.");
+    let response = make_request(
+        format!("{}/api/v1/auth/validate-token", &app.address),
+        app.api_key.clone(),
+        Some(body),
+        reqwest::Method::POST,
+    ).await;
 
     // Assert
     assert_eq!(response.status(), 403);
@@ -99,7 +89,6 @@ async fn test_validate_token_invalid_token() {
 async fn test_validate_token_ok() {
     // Arrange
     let app = spawn_app().await;
-    let client = reqwest::Client::new();
 
     // not valid api key
     let body = serde_json::json!({
@@ -107,12 +96,12 @@ async fn test_validate_token_ok() {
     });
 
     // Act
-    let response = client
-        .post(format!("{}/api/v1/auth/validate-token", &app.address))
-        .json(&body)
-        .send()
-        .await
-        .expect("Failed to execute request.");
+    let response = make_request(
+        format!("{}/api/v1/auth/validate-token", &app.address),
+        app.api_key.clone(),
+        Some(body),
+        reqwest::Method::POST,
+    ).await;
 
     // Assert
     assert_eq!(response.status(), 200);
