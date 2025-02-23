@@ -1,6 +1,7 @@
 use std::net::TcpListener;
 
 use actix_web::{
+    Result,
     body::MessageBody,
     dev::{Server, ServiceRequest, ServiceResponse},
     middleware::{from_fn, Next, Logger},
@@ -15,6 +16,10 @@ use crate::{
     models::SettingsDB,
     routes::{create_settings, get_settings, get_settings_by_key, delete_settings, health_check, validate_token},
 };
+
+async fn fallback_index() -> Result<actix_files::NamedFile> {
+    Ok(actix_files::NamedFile::open("./ui/dist/index.html")?)
+}
 
 pub fn json_error_handler(cfg: &mut web::ServiceConfig) {
     cfg.app_data(web::JsonConfig::default().error_handler(|err, _req| {
@@ -86,7 +91,9 @@ pub fn run(
 
         // if release build, serve the UI
         if !cfg!(debug_assertions) {
-            app = app.service(actix_files::Files::new("/", "./ui/dist").index_file("index.html"));
+            app = app.service(actix_files::Files::new("/", "./ui/dist")
+                .index_file("index.html")
+                .default_handler(web::to(fallback_index)));
         }
         app
     })

@@ -6,8 +6,15 @@ docker build -t dynamic-settings .
 ```
 
 ```
-docker run -d -p 8000:8000 -e APPLICATION_PORT=8000 -e API_KEY=api-key -v db_data:/app/db dynamic-settings
+docker run -d -p 18100:18100 -v db_data:/app/db dynamic-settings
 ```
+
+
+```
+APPLICATION_PORT=18100
+API_KEY=api-key
+```
+
 
 ## Development
 ### Backend

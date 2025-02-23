@@ -1,3 +1,5 @@
+use std::cmp::Reverse;
+
 use actix_web::web;
 use actix_web::HttpResponse;
 
@@ -18,6 +20,6 @@ pub async fn get_settings_by_key(
 
 pub async fn get_settings(db: web::Data<SettingsDB>) -> Result<HttpResponse, CustomError> {
     let mut settings_rows = db_get_settings(&db)?;
-    settings_rows.sort_by_key(|s| s.created_at);
+    settings_rows.sort_by_key(|s| Reverse(s.created_at));
     Ok(HttpResponse::Ok().json(settings_rows))
 }
