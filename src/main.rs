@@ -11,7 +11,7 @@ async fn main() -> std::io::Result<()> {
     let config = get_config().expect("Failed to read configuration.");
 
     let keyspace = Config::new("db")
-        .open()
+        .open_transactional()
         .expect("Failed connect to keyspace");
     let partition = keyspace
         .open_partition("settings", PartitionCreateOptions::default())

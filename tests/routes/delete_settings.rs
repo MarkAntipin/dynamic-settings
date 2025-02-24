@@ -20,7 +20,8 @@ async fn test_deleted_settings() {
         key: key.clone(),
         value: value.clone(),
         value_type: SettingsValueType::Int,
-        created_at: Utc::now()
+        created_at: Utc::now(),
+        updated_at: Utc::now(),
     };
 
     create_settings(&app.partition, &settings);

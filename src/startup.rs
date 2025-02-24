@@ -14,7 +14,15 @@ use env_logger::Env;
 use crate::{
     errors::CustomError,
     models::SettingsDB,
-    routes::{create_settings, get_settings, get_settings_by_key, delete_settings, health_check, validate_token},
+    routes::{
+        create_settings,
+        get_settings,
+        get_settings_by_key,
+        delete_settings,
+        update_settings,
+        health_check,
+        validate_token
+    },
 };
 
 async fn fallback_index() -> Result<actix_files::NamedFile> {
@@ -77,6 +85,7 @@ pub fn run(
                         .route("", web::post().to(create_settings))
                         .route("", web::get().to(get_settings))
                         .route("", web::delete().to(delete_settings))
+                        .route("", web::put().to(update_settings))
                         .route("/{key}", web::get().to(get_settings_by_key))
                 )
                 .service(

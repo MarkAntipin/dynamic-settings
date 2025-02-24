@@ -1,14 +1,14 @@
 use dynamic_settings::config::get_config;
 use dynamic_settings::models::{SettingsDBRow, SettingsDB};
 use dynamic_settings::startup;
-use fjall::PartitionHandle;
+use fjall::TxPartitionHandle;
 use fjall::{Config, PartitionCreateOptions};
 use std::net::TcpListener;
 use tokio::sync::OnceCell;
 
 pub struct TestApp {
     pub address: String,
-    pub partition: PartitionHandle,
+    pub partition: TxPartitionHandle,
     pub api_key: String,
 }
 
@@ -19,7 +19,7 @@ async fn setup_app() -> TestApp {
     let config = get_config().expect("Failed to read configuration.");
 
     let keyspace = Config::new("db")
-        .open()
+        .open_transactional()
         .expect("Failed connect to keyspace");
     let partition = keyspace
         .open_partition("settings", PartitionCreateOptions::default())
@@ -48,7 +48,7 @@ pub async fn spawn_app() -> &'static TestApp {
     INIT.get_or_init(setup_app).await
 }
 
-pub fn create_settings(partition: &PartitionHandle, settings: &SettingsDBRow) {
+pub fn create_settings(partition: &TxPartitionHandle, settings: &SettingsDBRow) {
     let key = &settings.key;
     let serialized: Vec<u8> = settings.into();
     partition
@@ -57,7 +57,7 @@ pub fn create_settings(partition: &PartitionHandle, settings: &SettingsDBRow) {
 }
 
 pub fn get_settings(
-    partition: &PartitionHandle,
+    partition: &TxPartitionHandle,
     key: &str,
 ) -> Result<Option<SettingsDBRow>, fjall::Error> {
     let Some(item) = partition.get(key)? else {

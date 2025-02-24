@@ -124,6 +124,7 @@ async fn test_create_settings_key_already_exists() {
         value: value.clone(),
         value_type: SettingsValueType::Int,
         created_at: Utc::now(),
+        updated_at: Utc::now(),
     };
 
     create_settings(&app.partition, &settings);

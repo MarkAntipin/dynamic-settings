@@ -2,12 +2,12 @@ use actix_web::web;
 use actix_web::HttpResponse;
 
 use crate::errors::CustomError;
-use crate::models::{MessageResponse, SettingsRequest, SettingsDBRow, SettingsDB};
+use crate::models::{MessageResponse, CreateSettingsRequest, SettingsDBRow, SettingsDB};
 use crate::repository::db_create_settings;
 
 pub async fn create_settings(
     db: web::Data<SettingsDB>,
-    payload: web::Json<SettingsRequest>,
+    payload: web::Json<CreateSettingsRequest>,
 ) -> Result<HttpResponse, CustomError> {
     let settings = payload.into_inner();
     settings.validate()?;
