@@ -18,7 +18,7 @@ pub async fn update_settings(
 
     if key.is_none() {
         return Err(CustomError::NotFoundError(
-            format!("No such settings with key '{}'", update_setting_payload.key)
+            format!("Settings with key '{}' not found", update_setting_payload.key)
         ))
     }
 
