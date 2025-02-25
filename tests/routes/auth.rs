@@ -20,11 +20,7 @@ async fn test_auth_no_api_key_header() {
     // Assert
     assert_eq!(response.status(), 401);
 
-    let body: MessageResponse = response
-        .json()
-        .await
-        .expect("Failed to parse response body.");
-
+    let body: MessageResponse = response.json().await.unwrap();
     assert_eq!(body.message, "missing `X-Api-Key` header");
 }
 
@@ -46,11 +42,7 @@ async fn test_auth_invalid_api_key_header() {
     // Assert
     assert_eq!(response.status(), 403);
 
-    let body: MessageResponse = response
-        .json()
-        .await
-        .expect("Failed to parse response body.");
-
+    let body: MessageResponse = response.json().await.unwrap();
     assert_eq!(body.message, "invalid `X-Api-Key` header");
 }
 
@@ -76,11 +68,7 @@ async fn test_validate_token_invalid_token() {
     // Assert
     assert_eq!(response.status(), 403);
 
-    let body: MessageResponse = response
-        .json()
-        .await
-        .expect("Failed to parse response body.");
-
+    let body: MessageResponse = response.json().await.unwrap();
     assert_eq!(body.message, "Invalid token");
 }
 
@@ -106,10 +94,6 @@ async fn test_validate_token_ok() {
     // Assert
     assert_eq!(response.status(), 200);
 
-    let body: MessageResponse = response
-        .json()
-        .await
-        .expect("Failed to parse response body.");
-
+    let body: MessageResponse = response.json().await.unwrap();
     assert_eq!(body.message, "Token is valid");
 }

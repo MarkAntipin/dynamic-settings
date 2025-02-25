@@ -7,7 +7,6 @@ use dynamic_settings::models::MessageResponse;
 use dynamic_settings::models::SettingsDBRow;
 use dynamic_settings::enums::SettingsValueType;
 
-
 #[tokio::test]
 async fn test_create_settings_ok() {
     // TODO: use some kind of `parameterized` here
@@ -44,16 +43,10 @@ async fn test_create_settings_ok() {
         // Assert
         assert_eq!(response.status(), 201);
 
-        let body: MessageResponse = response
-            .json()
-            .await
-            .expect("Failed to parse response body.");
+        let body: MessageResponse = response.json().await.unwrap();
         assert_eq!(body.message, format!("Settings with key '{}' created", key));
 
-        let settings = get_settings(&app.partition, &key)
-            .expect("Failed to fetch the setting")
-            .unwrap_or_else(|| panic!("Settings not found for key: {}", key));
-
+        let settings = get_settings(&app.partition, &key).unwrap().unwrap();
         assert_eq!(settings.key, key);
         assert_eq!(settings.value, value);
     }
@@ -85,10 +78,7 @@ async fn test_create_settings_int_invalid() {
     // Assert
     assert_eq!(response.status(), 422);
 
-    let body: MessageResponse = response
-        .json()
-        .await
-        .expect("Failed to parse response body.");
+    let body: MessageResponse = response.json().await.unwrap();
     assert_eq!(body.message, "Value 'invalid' is not a valid integer");
 }
 
@@ -106,6 +96,7 @@ async fn test_create_settings_key_already_exists() {
         value: value.clone(),
         value_type: SettingsValueType::Int,
         created_at: Utc::now(),
+        updated_at: Utc::now(),
     };
 
     create_settings(&app.partition, &settings);
@@ -127,10 +118,7 @@ async fn test_create_settings_key_already_exists() {
     // Assert
     assert_eq!(response.status(), 409);
 
-    let body: MessageResponse = response
-        .json()
-        .await
-        .expect("Failed to parse response body.");
+    let body: MessageResponse = response.json().await.unwrap();
     assert_eq!(
         body.message,
         format!("Settings with key '{}' already exist", key)
@@ -162,10 +150,7 @@ async fn test_create_settings_invalid_input_missing_type() {
     // Assert
     assert_eq!(response.status(), 422);
 
-    let body: MessageResponse = response
-        .json()
-        .await
-        .expect("Failed to parse response body.");
+    let body: MessageResponse = response.json().await.unwrap();
     assert_eq!(body.message, "Json deserialize error: missing field `type`");
 }
 
@@ -194,9 +179,6 @@ async fn test_create_settings_invalid_input_key_is_to_big() {
     // Assert
     assert_eq!(response.status(), 422);
 
-    let body: MessageResponse = response
-        .json()
-        .await
-        .expect("Failed to parse response body.");
+    let body: MessageResponse = response.json().await.unwrap();
     assert_eq!(body.message, "Key length should be less than 1024 bytes");
 }

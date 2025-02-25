@@ -1,16 +1,16 @@
 use chrono::{DateTime, Utc};
-use fjall::{Keyspace, PartitionHandle, UserKey, UserValue};
+use fjall::{TxKeyspace, TxPartitionHandle, UserKey, UserValue};
 use serde::{Deserialize, Serialize};
 
 use crate::enums::SettingsValueType;
-use crate::models::SettingsRequest;
+use crate::models::CreateSettingsRequest;
 
 
 pub struct SettingsDB {
     #[allow(unused)]
-    pub keyspace: Keyspace,
+    pub keyspace: TxKeyspace,
 
-    pub partition: PartitionHandle,
+    pub partition: TxPartitionHandle,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -19,7 +19,10 @@ pub struct SettingsDBRow {
     pub value: String,
     #[serde(rename = "type")]
     pub value_type: SettingsValueType,
+
     pub created_at: DateTime<Utc>,
+    #[serde(default)]
+    pub updated_at: DateTime<Utc>,
 }
 
 impl From<&SettingsDBRow> for Vec<u8> {
@@ -38,13 +41,15 @@ impl From<(UserKey, UserValue)> for SettingsDBRow {
     }
 }
 
-impl From<SettingsRequest> for SettingsDBRow {
-    fn from(request: SettingsRequest) -> Self {
+impl From<CreateSettingsRequest> for SettingsDBRow {
+    fn from(request: CreateSettingsRequest) -> Self {
+        let now = Utc::now();
         Self {
             key: request.key,
             value: request.value,
             value_type: request.value_type,
-            created_at: Utc::now()
+            created_at: now,
+            updated_at: now,
         }
     }
 }
