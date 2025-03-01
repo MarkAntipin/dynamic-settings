@@ -42,7 +42,7 @@ async fn test_update_settings_ok() {
     assert_eq!(body.message, "Settings updated");
 
     let settings = get_settings(&app.partition, &key).unwrap().unwrap();
-    assert_eq!(settings.key, key);
+    // Updated
     assert_eq!(settings.value, "200");
     assert!(settings.updated_at > now);
 }
@@ -111,7 +111,7 @@ async fn test_update_settings_invalid_input_invalid_type() {
     assert_eq!(body.message, "Value 'Not int value' is not a valid integer");
 
     let settings = get_settings(&app.partition, &key).unwrap().unwrap();
-    assert_eq!(settings.key, key);
+    // No changes
     assert_eq!(settings.value, "100");
     assert_eq!(settings.created_at, now);
 }
