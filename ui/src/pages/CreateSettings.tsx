@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SettingsValueType, Settings } from "../types/settings";
+import { SettingsValueType, CreateSettings } from "../types/settings";
 import { createSetting } from "../api/settingsApi";
 
 const CreateSettingsPage: React.FC = () => {
@@ -12,7 +12,7 @@ const CreateSettingsPage: React.FC = () => {
 
   const handleSave = async () => {
     setError(null);
-    const newSetting: Settings = { key, type, value };
+    const newSetting: CreateSettings = { key, type, value };
 
     try {
       await createSetting(newSetting);

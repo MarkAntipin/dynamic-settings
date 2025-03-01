@@ -9,5 +9,12 @@ export enum SettingsValueType {
 export interface Settings {
     key: string
     value: string
-    type: SettingsValueType
+    type: SettingsValueType,
+    updatedAt: Date
+}
+
+export interface CreateSettings {
+    key: string
+    value: string
+    type: SettingsValueType,
 }

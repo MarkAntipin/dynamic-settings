@@ -20,8 +20,9 @@ pub struct SettingsDBRow {
     #[serde(rename = "type")]
     pub value_type: SettingsValueType,
 
+    #[serde(rename = "createdAt")]
     pub created_at: DateTime<Utc>,
-    #[serde(default)]
+    #[serde(rename = "updatedAt")]
     pub updated_at: DateTime<Utc>,
 }
 

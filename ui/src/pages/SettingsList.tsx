@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchSettings } from "../api/settingsApi";
 import { Settings } from "../types/settings";
+import {formatDate} from "../utils/formaters.ts";
 
-const ITEMS_PER_PAGE = 30;
+const ITEMS_PER_PAGE = 20;
 
 const SettingsListPage: React.FC = () => {
   const [settings, setSettings] = useState<Settings[]>([]);
@@ -76,6 +77,7 @@ const SettingsListPage: React.FC = () => {
             <tr className="bg-gray-100 text-left">
               <th className="p-2 border border-gray-200">Key</th>
               <th className="p-2 border border-gray-200">Type</th>
+              <th className="p-2 border border-gray-200">Updated</th>
               <th className="p-2 border border-gray-200">Value</th>
             </tr>
           </thead>
@@ -91,7 +93,10 @@ const SettingsListPage: React.FC = () => {
                 </td>
                 <td className="p-2 border border-gray-200">{setting.type}</td>
                 <td className="p-2 border border-gray-200">
-                    {setting.value.length > 50 ? `${setting.value.slice(0, 50)}...` : setting.value}
+                {formatDate(setting.updatedAt)}
+              </td>
+                <td className="p-2 border border-gray-200">
+                    {setting.value.length > 40 ? `${setting.value.slice(0, 40)}...` : setting.value}
                 </td>
               </tr>
             ))}
@@ -106,17 +111,17 @@ const SettingsListPage: React.FC = () => {
           disabled={currentPage === 1}
           className="px-3 py-1 border rounded-md bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
         >
-          Prev
+          ◀️
         </button>
         <span className="px-3 py-1 border rounded-md bg-gray-100">
-          Page {currentPage} of {totalPages}
+          {currentPage} of {totalPages}
         </span>
         <button
           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
           className="px-3 py-1 border rounded-md bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
         >
-          Next
+          ▶️
         </button>
       </div>
     </div>
