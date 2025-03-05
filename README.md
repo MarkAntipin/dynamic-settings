@@ -11,7 +11,7 @@ It provides a web-based UI and an API to manage key-value pairs efficiently.
 ```
 docker pull markantipin12/dynamic-settings
 
-docker run -d -p 18100:18100 markantipin12/dynamic-settings
+docker run -d -p 18100:18100 -v db_data:/app/db markantipin12/dynamic-settings
 
 open http://localhost:18100
 ```
@@ -30,8 +30,11 @@ API_KEY=api-key # The API key to access the API
 - 🏗️ **API-Driven** – A RESTful API for programmatic access to settings.
 - 🖥️ **User-Friendly UI** – Manage settings through an intuitive web interface.
 
----
 
+## 👷 Client Libraries
+- **[Python](https://github.com/MarkAntipin/dynamic-settings-python)**
+
+---
 
 ## 🛠 Development
 ### With docker
