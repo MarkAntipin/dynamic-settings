@@ -6,6 +6,23 @@ import { formatDate } from "../utils/formaters.ts";
 
 const ITEMS_PER_PAGE = 20;
 
+const getBadgeColor = (type: string): string => {
+  switch (type.toLowerCase()) {
+    case "bool":
+      return "bg-green-500";
+    case "str":
+      return "bg-blue-500";
+    case "int":
+      return "bg-purple-500";
+    case "float":
+      return "bg-indigo-500";
+    case "json":
+      return "bg-yellow-500 text-black";
+    default:
+      return "bg-gray-500";
+  }
+};
+
 const SettingsListPage: React.FC = () => {
   const [settings, setSettings] = useState<Settings[]>([]);
   const [filteredSettings, setFilteredSettings] = useState<Settings[]>([]);
@@ -50,7 +67,7 @@ const SettingsListPage: React.FC = () => {
   const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
   const currentSettings = filteredSettings.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredSettings.length / ITEMS_PER_PAGE);
+  const totalPages = Math.max(Math.ceil(filteredSettings.length / ITEMS_PER_PAGE), 1);
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -58,7 +75,7 @@ const SettingsListPage: React.FC = () => {
       <h2 className="text-2xl font-semibold mb-4">Dynamic Settings ⚙️</h2>
 
       {/* Search & Create Button */}
-      {filteredSettings.length > 0 && (
+      {settings.length > 0 && (
         <div className="flex justify-between items-center mb-4 gap-4">
           <input
             type="text"
@@ -77,7 +94,7 @@ const SettingsListPage: React.FC = () => {
       )}
 
       {/* No settings */}
-      {filteredSettings.length === 0 ? (
+      {settings.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-gray-600 mb-4">No settings here yet! 😮 Tap the ➕ below to create one!</p>
           <Link
@@ -108,7 +125,15 @@ const SettingsListPage: React.FC = () => {
                         {setting.key}
                       </Link>
                     </td>
-                    <td className="p-2 border border-gray-200">{setting.type}</td>
+                    <td className="p-2 border border-gray-200">
+                      <span
+                        className={`inline-block px-3 py-1 text-xs font-semibold text-white rounded-full ${getBadgeColor(
+                          setting.type
+                        )}`}
+                      >
+                        {setting.type.toUpperCase()}
+                      </span>
+                    </td>
                     <td className="p-2 border border-gray-200">{formatDate(setting.updatedAt)}</td>
                     <td className="p-2 border border-gray-200">
                       {setting.value.length > 40 ? `${setting.value.slice(0, 40)}...` : setting.value}

@@ -4,6 +4,7 @@ import SettingsListPage from "./pages/SettingsList.tsx";
 import CreateSettingsPage from "./pages/CreateSettings.tsx";
 import ManageSettingsPage from "./pages/ManageSettings.tsx";
 import AuthTokenPage from "./pages/auth.tsx";
+import { validateToken } from "./api/authApi.ts";
 
 interface ProtectedRouteProps {
   element: ReactNode;
@@ -13,8 +14,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    setIsAuthenticated(!!token);
+    const checkToken = async () => {
+      const token: string | null = localStorage.getItem("authToken");
+      if (!token) {
+        setIsAuthenticated(false);
+        return;
+      }
+      try {
+        await validateToken(token);
+        setIsAuthenticated(true);
+      } catch {
+        localStorage.removeItem("authToken");
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkToken();
   }, []);
 
   if (isAuthenticated === null) {
