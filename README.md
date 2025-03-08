@@ -8,7 +8,7 @@ It provides a web-based UI and an API to manage settings efficiently.
 
 ## 📖 Documentation
 
-[//]: # (TODO: Add documentation link)
+https://markantipin.github.io/dynamic-settings/
 
 ## 🚀 Quick setup
 ```
