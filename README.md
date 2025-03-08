@@ -1,11 +1,14 @@
 # ⚙️️ Dynamic Settings
 
-**Dynamic Settings** is a lightweight, real-time configuration management service
+**Dynamic Settings** is a lightweight, real-time configuration management service written in rust
 that allows you to store and update settings dynamically without redeploying your application.
-It provides a web-based UI and an API to manage key-value pairs efficiently.
+It provides a web-based UI and an API to manage settings efficiently.
 
-![Dynamic Settings UI](docs/images/settings-screen.png)
 ---
+
+## 📖 Documentation
+
+[//]: # (TODO: Add documentation link)
 
 ## 🚀 Quick setup
 ```
@@ -16,19 +19,13 @@ docker run -d -p 18100:18100 -v db_data:/app/db markantipin12/dynamic-settings
 open http://localhost:18100
 ```
 
-### Environment Variables
-```
-APPLICATION_PORT=18100	# The port on which the application will run
-API_KEY=api-key # The API key to access the API
-```
 
+## ✨ Features
 
-## ✨ Why Dynamic Settings?
-
-- 🦀 **Built with Rust** – Designed for speed, safety, and low resource consumption.
-- 🔧 **Live Configuration Updates** – Modify settings in real-time without restarting your application.
-- 🏗️ **API-Driven** – A RESTful API for programmatic access to settings.
-- 🖥️ **User-Friendly UI** – Manage settings through an intuitive web interface.
+- **Real-time Configuration** – Modify settings in real-time without restarting your application
+- **Built with Rust** – Designed for speed and safety
+- **User-Friendly UI** – Manage settings through an intuitive web interface
+- **API-Driven** – A RESTful API for programmatic access to settings
 
 
 ## 👷 Client Libraries
@@ -36,43 +33,7 @@ API_KEY=api-key # The API key to access the API
 
 ---
 
-## 🛠 Development
-### With docker
-```
-docker build -t dynamic-settings .
+## 👨‍🏫 Tutorials
+- **[Effortless Configuration: Making Your FastAPI App Dynamic](https://medium.com/@mr.antipin/effortless-configuration-making-your-fastapi-app-dynamic-d8652b0b4d56)**
 
-docker run -d -p 18100:18100 dynamic-settings
-```
-
-### Without docker
-#### Backend
-**Run**
-```
-cargo run
-```
-**Test**
-```
-cargo test
-```
-**Linter**
-```
-cargo clippy --all-targets --all-features
-```
-
-#### Frontend (ui folder)
-**Install dependencies**
-```
-npm install
-```
-**Run**
-```
-npm start
-```
-**Build**
-```
-npm run build
-```
-**Linter**
-```
-npm run lint
-```
+---
