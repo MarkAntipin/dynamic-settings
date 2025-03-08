@@ -27,3 +27,4 @@ target/
 # Ignore Docker-specific files
 .dockerignore
 Dockerfile
+docs/
