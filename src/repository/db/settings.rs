@@ -35,10 +35,13 @@ pub fn db_get_settings_by_key(
     Ok(Some(settings))
 }
 
-pub fn db_get_settings(db: &SettingsDB) -> Result<Vec<SettingsDBRow>, fjall::Error> {
+pub fn db_get_settings(
+    db: &SettingsDB,
+    prefix: String,
+) -> Result<Vec<SettingsDBRow>, fjall::Error> {
     let read_tx = db.keyspace.read_tx();
     let settings = read_tx
-        .iter(&db.partition)
+        .prefix(&db.partition, prefix)
         .map(|item| item.map(SettingsDBRow::from))
         .collect::<Result<Vec<SettingsDBRow>, _>>()?;
 
