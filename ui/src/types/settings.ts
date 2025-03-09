@@ -10,6 +10,7 @@ export interface Settings {
     key: string
     value: string
     type: SettingsValueType,
+    createdAt: Date,
     updatedAt: Date
 }
 

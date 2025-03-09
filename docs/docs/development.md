@@ -35,6 +35,12 @@ npm start
 ```
 npm run build
 ```
+
+**Test**
+```
+npm test
+```
+
 **Linter**
 ```
 npm run lint

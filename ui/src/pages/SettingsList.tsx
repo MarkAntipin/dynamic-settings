@@ -2,26 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchSettings } from "../api/settingsApi";
 import { Settings } from "../types/settings";
-import { formatDate } from "../utils/formaters.ts";
+import { formatDateForSettingsList } from "../utils/FormatDate.ts";
+import { GetBadgeColor } from "../utils/BadgeColor.ts";
 
 const ITEMS_PER_PAGE = 20;
-
-const getBadgeColor = (type: string): string => {
-  switch (type.toLowerCase()) {
-    case "bool":
-      return "bg-green-500";
-    case "str":
-      return "bg-blue-500";
-    case "int":
-      return "bg-purple-500";
-    case "float":
-      return "bg-indigo-500";
-    case "json":
-      return "bg-yellow-500 text-black";
-    default:
-      return "bg-gray-500";
-  }
-};
 
 const SettingsListPage: React.FC = () => {
   const [settings, setSettings] = useState<Settings[]>([]);
@@ -127,14 +111,14 @@ const SettingsListPage: React.FC = () => {
                     </td>
                     <td className="p-2 border border-gray-200">
                       <span
-                        className={`inline-block px-3 py-1 text-xs font-semibold text-white rounded-full ${getBadgeColor(
+                        className={`inline-block px-3 py-1 text-xs font-semibold text-white rounded-full ${GetBadgeColor(
                           setting.type
                         )}`}
                       >
                         {setting.type.toUpperCase()}
                       </span>
                     </td>
-                    <td className="p-2 border border-gray-200">{formatDate(setting.updatedAt)}</td>
+                    <td className="p-2 border border-gray-200">{formatDateForSettingsList(setting.updatedAt)}</td>
                     <td className="p-2 border border-gray-200">
                       {setting.value.length > 40 ? `${setting.value.slice(0, 40)}...` : setting.value}
                     </td>
