@@ -125,13 +125,13 @@ const ManageSettingsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
             <div>
               <span className="block mb-1">📅 Created:</span>
-              <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+              <div className="bg-gray-100 p-2 rounded-md border border-gray-300">
                 {formatDate(new Date(setting.createdAt))}
               </div>
             </div>
             <div>
               <span className="block mb-1">🕒 Last Updated:</span>
-              <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+              <div className="bg-gray-100 p-2 rounded-md border border-gray-300">
                 {formatDate(new Date(setting.updatedAt))}
               </div>
             </div>
