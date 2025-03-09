@@ -63,6 +63,17 @@ const ManageSettingsPage: React.FC = () => {
     setIsEditing(false);
   };
 
+  const formatDate = (date: Date): string => {
+    return new Date(date).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+  };
+
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-md">
       {/* Top Bar: Back Button & Title */}
@@ -80,7 +91,7 @@ const ManageSettingsPage: React.FC = () => {
       {setting ? (
         <div className="space-y-4">
           <div>
-            <label className="block text-gray-700">Key:</label>
+            <label className="block text-gray-700 mb-1">Key:</label>
             <input
               type="text"
               value={setting.key}
@@ -90,7 +101,7 @@ const ManageSettingsPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-gray-700">Type:</label>
+            <label className="block text-gray-700 mb-1">Type:</label>
             <input
               type="text"
               value={setting.type}
@@ -100,7 +111,7 @@ const ManageSettingsPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-gray-700">Value:</label>
+            <label className="block text-gray-700 mb-1">Value:</label>
             <textarea
               value={updatedValue}
               onChange={(e) => setUpdatedValue(e.target.value)}
@@ -108,6 +119,22 @@ const ManageSettingsPage: React.FC = () => {
               rows={5}
               className="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
             />
+          </div>
+
+          {/* Display Created & Updated Dates */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
+            <div>
+              <span className="block mb-1">📅 Created:</span>
+              <div className="bg-gray-100 p-2 rounded-md border border-gray-300">
+                {formatDate(new Date(setting.createdAt))}
+              </div>
+            </div>
+            <div>
+              <span className="block mb-1">🕒 Last Updated:</span>
+              <div className="bg-gray-100 p-2 rounded-md border border-gray-300">
+                {formatDate(new Date(setting.updatedAt))}
+              </div>
+            </div>
           </div>
 
           {/* Edit/Update Buttons */}
@@ -144,7 +171,7 @@ const ManageSettingsPage: React.FC = () => {
           </button>
         </div>
       ) : (
-        <p className="text-gray-500">Loading setting...</p>
+        <p className="text-gray-700">Loading setting...</p>
       )}
       {/* Display Backend Error */}
       {error && <p className="text-red-500 mb-4">{error}</p>}
