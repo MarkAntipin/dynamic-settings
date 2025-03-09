@@ -71,7 +71,6 @@ pub fn run(
     env_logger::init_from_env(Env::default().default_filter_or("info"));
 
     let server = HttpServer::new(move || {
-        // TODO: now allow all, but in production should be more strict
         let cors = Cors::permissive();
 
         let mut app = App::new()
