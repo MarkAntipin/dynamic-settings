@@ -5,7 +5,7 @@ interface TypeInputProps {
   onChange?: (value: SettingsValueType) => void;
   disabled?: boolean;
 }
- // 🛒📝
+
 const TypeInput: React.FC<TypeInputProps> = ({ value, onChange, disabled = false }) => {
   return (
     <div>
