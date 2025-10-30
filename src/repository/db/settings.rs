@@ -1,92 +1,163 @@
-use fjall;
-use chrono::Utc;
+use sqlx;
 use crate::errors::CustomError;
 use crate::models::{SettingsDBRow, SettingsDB};
 use crate::utils::validate_settings_value;
+use sqlx::{SqlitePool, Transaction, Sqlite};
+use chrono::Utc;
 
-pub fn db_create_settings(
+pub async fn db_create_settings(
     db: &SettingsDB,
     settings_row: &SettingsDBRow,
-) -> Result<Option<String>, fjall::Error> {
-    let key = &settings_row.key;
+) -> Result<Option<String>, sqlx::Error> {
+    let value_type_str = settings_row.value_type.to_string();
 
-    let Some(_) = db.partition.get(key)? else {
-        let serialized: Vec<u8> = settings_row.into();
-        db.partition
-            .insert(key, serialized)
-            .expect("Failed to insert settings");
-        db.keyspace.persist(fjall::PersistMode::SyncAll)?;
+    let result = sqlx::query!(
+        r#"
+        INSERT INTO settings (key, value, type, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT(key) DO NOTHING
+        "#,
+        settings_row.key,
+        settings_row.value,
+        value_type_str,
+        settings_row.created_at,
+        settings_row.updated_at
+    )
+    .execute(&db.pool)
+    .await?;
 
-        return Ok(Some(key.clone()));
-    };
-    Ok(None)
+    if result.rows_affected() > 0 {
+        Ok(Some(settings_row.key.clone()))
+    } else {
+        Ok(None)
+    }
 }
 
-pub fn db_get_settings_by_key(
+pub async fn db_get_settings_by_key(
     db: &SettingsDB,
     key: &str,
-) -> Result<Option<SettingsDBRow>, fjall::Error> {
-    let Some(item) = db.partition.get(key)? else {
-        return Ok(None);
-    };
+) -> Result<Option<SettingsDBRow>, sqlx::Error> {
+    let row: Option<SettingsDBRow> = sqlx::query_as!(
+        SettingsDBRow,
+        r#"
+        SELECT
+            key as "key!",
+            value as "value!",
+            type as "value_type!: _",
+            created_at as "created_at!: _",
+            updated_at as "updated_at!: _"
+        FROM settings
+        WHERE key = $1
+        "#,
+        key
+    )
+    .fetch_optional(&db.pool)
+    .await?;
 
-    let settings: SettingsDBRow = rmp_serde::from_slice(&item)
-        .expect("Error deserializing settings from bytes");
-    Ok(Some(settings))
+    Ok(row)
 }
 
-pub fn db_get_settings(
+pub async fn db_get_settings(
     db: &SettingsDB,
     prefix: String,
-) -> Result<Vec<SettingsDBRow>, fjall::Error> {
-    let read_tx = db.keyspace.read_tx();
-    let settings = read_tx
-        .prefix(&db.partition, prefix)
-        .map(|item| item.map(SettingsDBRow::from))
-        .collect::<Result<Vec<SettingsDBRow>, _>>()?;
+) -> Result<Vec<SettingsDBRow>, sqlx::Error> {
+    let like_pattern = format!("{}%", prefix);
 
-    Ok(settings)
+    let rows: Vec<SettingsDBRow> = sqlx::query_as!(
+        SettingsDBRow,
+        r#"
+        SELECT
+            key as "key!",
+            value as "value!",
+            type as "value_type!: _",
+            created_at as "created_at!: _",
+            updated_at as "updated_at!: _"
+        FROM settings
+        WHERE key LIKE $1
+        "#,
+        like_pattern
+    )
+    .fetch_all(&db.pool)
+    .await?;
+    Ok(rows)
 }
 
-pub fn db_delete_settings_by_keys(
+pub async fn db_delete_settings_by_keys(
     db: &SettingsDB,
     keys: Vec<String>,
-) -> Result<(), fjall::Error> {
-    for key in keys {
-        db.partition.remove(&key)?;
+) -> Result<u64, sqlx::Error> {
+    if keys.is_empty() {
+        return Ok(0);
     }
-    db.keyspace.persist(fjall::PersistMode::SyncAll)?;
-    Ok(())
+
+    // Build placeholders for the keys e.g., $1, $2, ..., $n
+    let placeholders = (1..=keys.len())
+        .map(|i| format!("${}", i))
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    let query = format!("DELETE FROM settings WHERE key IN ({})", placeholders);
+    let mut q = sqlx::query(&query);
+    for key in &keys {
+        q = q.bind(key);
+    }
+    let result = q.execute(&db.pool).await?;
+    Ok(result.rows_affected())
 }
 
-pub fn db_update_settings_by_key(
-    db: &SettingsDB,
-    key: &String,
-    value: &String,
+pub async fn db_update_settings_by_key(
+    pool: &SqlitePool,
+    key: &str,
+    value: &str,
 ) -> Result<Option<String>, CustomError> {
-    let mut write_tx = db.keyspace.write_tx().durability(
-        Some(fjall::PersistMode::SyncAll)
-    );
+    // Begin a transaction
+    let mut tx: Transaction<'_, Sqlite> = pool.begin().await.map_err(CustomError::from)?;
 
-    let Some(item) = write_tx.get(&db.partition, key)? else {
+    // Fetch current settings row
+    let existing = sqlx::query_as!(
+        SettingsDBRow,
+        r#"
+        SELECT
+            key as "key!",
+            value as "value!",
+            type as "value_type!: _",
+            created_at as "created_at!: _",
+            updated_at as "updated_at!: _"
+        FROM settings
+        WHERE key = $1
+        "#,
+        key
+    )
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(CustomError::from)?;
+
+    let Some(settings) = existing else {
         return Ok(None);
     };
-    let settings: SettingsDBRow = rmp_serde::from_slice(&item)
-        .expect("Error deserializing settings from bytes");
 
-    validate_settings_value(value.clone(), settings.value_type.clone())?;
+    // Validate before updating
+    validate_settings_value(value.to_string(), settings.value_type.clone())?;
 
-    let settings_row = &SettingsDBRow {
-        key: settings.key.clone(),
-        value: value.to_string(),
-        value_type: settings.value_type,
-        created_at: settings.created_at,
-        updated_at: Utc::now(),
-    };
-    let serialized: Vec<u8> = settings_row.into();
+    // Perform update inside the same transaction
+    let now = Utc::now();
+    let updated = sqlx::query!(
+        r#"
+        UPDATE settings
+        SET value = $1,
+            updated_at = $2
+        WHERE key = $3
+        RETURNING key
+        "#,
+        value,
+        now,
+        key
+    )
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(CustomError::from)?;
 
-    write_tx.insert(&db.partition, key, serialized);
-    write_tx.commit()?;
+    tx.commit().await.map_err(CustomError::from)?;
 
-    Ok(Some(settings.key))
+    Ok(updated.map(|r| r.key).expect("Key should be present"))
 }

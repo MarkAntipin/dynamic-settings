@@ -1,4 +1,3 @@
-use fjall::{UserKey, UserValue};
 use serde::{Deserialize, Serialize};
 
 use crate::errors::CustomError;
@@ -19,16 +18,6 @@ pub struct CreateSettingsRequest {
 impl From<&CreateSettingsRequest> for Vec<u8> {
     fn from(val: &CreateSettingsRequest) -> Self {
         rmp_serde::to_vec(&val).expect("Error serializing settings to bytes")
-    }
-}
-
-impl From<(UserKey, UserValue)> for CreateSettingsRequest {
-    fn from((key, value): (UserKey, UserValue)) -> Self {
-        let key = std::str::from_utf8(&key).unwrap();
-        let mut item: CreateSettingsRequest =
-            rmp_serde::from_slice(&value).expect("Error deserializing settings from bytes");
-        key.clone_into(&mut item.key);
-        item
     }
 }
 
@@ -54,6 +43,17 @@ impl CreateSettingsRequest {
 #[derive(Serialize, Deserialize)]
 pub struct DeleteSettingsByKeysRequest {
     pub keys: Vec<String>,
+}
+
+impl DeleteSettingsByKeysRequest {
+    pub fn validate(&self) -> Result<(), CustomError> {
+        if self.keys.is_empty() {
+            return Err(CustomError::ValidationError(
+                "Keys array should not be empty".to_string(),
+            ));
+        }
+        Ok(())
+    }
 }
 
 #[derive(Serialize, Deserialize)]

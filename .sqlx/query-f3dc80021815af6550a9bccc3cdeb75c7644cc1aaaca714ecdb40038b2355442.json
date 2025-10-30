@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE settings\n        SET value = $1,\n            updated_at = $2\n        WHERE key = $3\n        RETURNING key\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "key",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "f3dc80021815af6550a9bccc3cdeb75c7644cc1aaaca714ecdb40038b2355442"
+}

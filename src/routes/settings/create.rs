@@ -13,7 +13,7 @@ pub async fn create_settings(
     settings.validate()?;
 
     let settings_row: SettingsDBRow = settings.into();
-    let key = db_create_settings(&db, &settings_row)?;
+    let key = db_create_settings(&db, &settings_row).await?;
 
     if key.is_none() {
         return Err(CustomError::ConflictError(

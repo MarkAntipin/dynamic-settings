@@ -1,4 +1,4 @@
-FROM rust:1.83-alpine AS backend-builder
+FROM rust:1.90-alpine AS backend-builder
 
 WORKDIR /usr/src/app
 
@@ -7,7 +7,8 @@ RUN apk add --no-cache \
     musl-dev \
     linux-headers \
     pkgconfig \
-    openssl-dev
+    openssl-dev \
+    sqlite-dev
 
 COPY . .
 
@@ -21,11 +22,20 @@ COPY ui ./
 
 RUN npm install && npm run build
 
-FROM alpine
+FROM alpine:latest
+
+RUN apk add --no-cache bash sqlite
 
 WORKDIR /app
 
 COPY --from=backend-builder /usr/src/app/target/release/dynamic_settings .
 COPY --from=frontend-builder /app/ui/dist /app/ui/dist
 
+RUN mkdir -p /app/data
+
+# Environment variables
+ENV APP_DB_NAME=/app/data/dynamic-settings.db
+ENV DATABASE_URL=sqlite:///app/data/dynamic-settings.db
+
+# Run migrations on startup, then launch app
 CMD ["./dynamic_settings"]

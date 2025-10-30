@@ -21,7 +21,7 @@ async fn test_update_settings_ok() {
         created_at: now,
         updated_at: now,
     };
-    create_settings(&app.partition, &settings);
+    create_settings(&app.pool, &settings).await.expect("Failed to create settings");
     let body = serde_json::json!({
         "key": key,
         "value": "200",
@@ -32,6 +32,7 @@ async fn test_update_settings_ok() {
         format!("{}/api/v1/settings", &app.address),
         app.api_key.clone(),
         Some(body),
+        None,
         reqwest::Method::PUT,
     ).await;
 
@@ -41,7 +42,7 @@ async fn test_update_settings_ok() {
     let body: MessageResponse = response.json().await.unwrap();
     assert_eq!(body.message, "Settings updated");
 
-    let settings = get_settings(&app.partition, &key).unwrap().unwrap();
+    let settings = get_settings(&app.pool, &key).await.unwrap().unwrap();
     // Updated
     assert_eq!(settings.value, "200");
     assert!(settings.updated_at > now);
@@ -62,6 +63,7 @@ async fn test_update_settings_key_does_not_exist() {
         format!("{}/api/v1/settings", &app.address),
         app.api_key.clone(),
         Some(body),
+        None,
         reqwest::Method::PUT,
     ).await;
 
@@ -90,7 +92,7 @@ async fn test_update_settings_invalid_input_invalid_type() {
         created_at: now,
         updated_at: now,
     };
-    create_settings(&app.partition, &settings);
+    create_settings(&app.pool, &settings).await.expect("Failed to create settings");
     let body = serde_json::json!({
         "key": key,
         "value": "Not int value",
@@ -101,6 +103,7 @@ async fn test_update_settings_invalid_input_invalid_type() {
         format!("{}/api/v1/settings", &app.address),
         app.api_key.clone(),
         Some(body),
+        None,
         reqwest::Method::PUT,
     ).await;
 
@@ -110,7 +113,7 @@ async fn test_update_settings_invalid_input_invalid_type() {
     let body: MessageResponse = response.json().await.unwrap();
     assert_eq!(body.message, "Value 'Not int value' is not a valid integer");
 
-    let settings = get_settings(&app.partition, &key).unwrap().unwrap();
+    let settings = get_settings(&app.pool, &key).await.unwrap().unwrap();
     // No changes
     assert_eq!(settings.value, "100");
     assert_eq!(settings.created_at, now);

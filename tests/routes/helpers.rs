@@ -3,15 +3,14 @@ use std::option::Option;
 use dynamic_settings::config::get_config;
 use dynamic_settings::models::{SettingsDBRow, SettingsDB};
 use dynamic_settings::startup;
-use fjall::TxPartitionHandle;
-use fjall::{Config, PartitionCreateOptions};
 use std::net::TcpListener;
 use reqwest::header::{HeaderMap, HeaderValue};
 use tokio::sync::OnceCell;
+use sqlx::sqlite::{SqlitePool, SqlitePoolOptions};
 
 pub struct TestApp {
     pub address: String,
-    pub partition: TxPartitionHandle,
+    pub pool: SqlitePool,
     pub api_key: String,
 }
 
@@ -21,15 +20,21 @@ async fn setup_app() -> TestApp {
 
     let config = get_config().expect("Failed to read configuration.");
 
-    let keyspace = Config::new("db")
-        .open_transactional()
-        .expect("Failed connect to keyspace");
-    let partition = keyspace
-        .open_partition("settings", PartitionCreateOptions::default())
-        .expect("Failed to connect to partition");
+    // Create in-memory SQLite database
+    let pool = SqlitePoolOptions::new()
+        .max_connections(5)
+        .connect("sqlite::memory:")
+        .await
+        .expect("Failed to create in-memory SQLite pool");
+
+    // Run migrations
+    sqlx::migrate!("./migrations")
+        .run(&pool)
+        .await
+        .expect("Failed to run migrations");
+
     let settings_db = SettingsDB {
-        keyspace,
-        partition: partition.clone(),
+        pool: pool.clone(),
     };
 
     let server = startup::run(listener, settings_db, config.api_key.clone())
@@ -39,7 +44,7 @@ async fn setup_app() -> TestApp {
 
     TestApp {
         address: format!("http://127.0.0.1:{}", port),
-        partition,
+        pool,
         api_key: config.api_key,
     }
 }
@@ -56,6 +61,7 @@ pub async fn make_request(
     url: String,
     api_key: String,
     body: Option<serde_json::Value>,
+    params: Option<serde_json::Value>,
     method: reqwest::Method,
 ) -> reqwest::Response {
     let client = reqwest::Client::new();
@@ -75,30 +81,52 @@ pub async fn make_request(
         request_builder
     };
 
+    let request_builder = if let Some(query_params) = params {
+        request_builder.query(&query_params)
+    } else {
+        request_builder
+    };
+
     request_builder
         .send()
         .await
         .expect("Failed to execute request.")
 }
 
+pub async fn create_settings(pool: &SqlitePool, settings: &SettingsDBRow) -> Result<(), sqlx::Error> {
+    let value_type_str = settings.value_type.to_string();
 
-pub fn create_settings(partition: &TxPartitionHandle, settings: &SettingsDBRow) {
-    let key = &settings.key;
-    let serialized: Vec<u8> = settings.into();
-    partition
-        .insert(key, serialized)
-        .expect("Failed to insert settings");
+    sqlx::query(
+        r#"
+        INSERT INTO settings (key, value, type, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?)
+        "#,
+    )
+    .bind(&settings.key)
+    .bind(&settings.value)
+    .bind(&value_type_str)
+    .bind(settings.created_at)
+    .bind(settings.updated_at)
+    .execute(pool)
+    .await?;
+
+    Ok(())
 }
 
-pub fn get_settings(
-    partition: &TxPartitionHandle,
+pub async fn get_settings(
+    pool: &SqlitePool,
     key: &str,
-) -> Result<Option<SettingsDBRow>, fjall::Error> {
-    let Some(item) = partition.get(key)? else {
-        return Ok(None);
-    };
+) -> Result<Option<SettingsDBRow>, sqlx::Error> {
+    let row = sqlx::query_as::<_, SettingsDBRow>(
+        r#"
+        SELECT key, value, type as value_type, created_at, updated_at
+        FROM settings
+        WHERE key = ?
+        "#
+    )
+    .bind(key)
+    .fetch_optional(pool)
+    .await?;
 
-    let settings: SettingsDBRow =
-        rmp_serde::from_slice(&item).expect("Error deserializing settings from bytes");
-    Ok(Some(settings))
+    Ok(row)
 }

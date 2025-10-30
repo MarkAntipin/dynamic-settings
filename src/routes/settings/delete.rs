@@ -10,8 +10,9 @@ pub async fn delete_settings(
     payload: web::Json<DeleteSettingsByKeysRequest>,
 ) -> Result<HttpResponse, CustomError> {
     let setting_keys = payload.into_inner();
+    setting_keys.validate()?;
 
-    db_delete_settings_by_keys(&db, setting_keys.keys)?;
+    db_delete_settings_by_keys(&db, setting_keys.keys).await?;
     let response = MessageResponse {
         message: "Settings deleted".to_string(),
     };
