@@ -23,7 +23,7 @@ async fn setup_app() -> TestApp {
     // Create in-memory SQLite database
     let pool = SqlitePoolOptions::new()
         .max_connections(5)
-        .connect("sqlite::memory:")
+        .connect("sqlite::memory:?cache=shared")
         .await
         .expect("Failed to create in-memory SQLite pool");
 

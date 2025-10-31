@@ -55,12 +55,16 @@ async fn test_get_settings_no_settings() {
     // Arrange
     let app = spawn_app().await;
 
+    let params = serde_json::json!({
+        "prefix": "non-existing-prefix-"
+    });
+
     // Act
     let response = make_request(
         format!("{}/api/v1/settings", &app.address),
         app.api_key.clone(),
         None,
-        None,
+        Some(params),
         reqwest::Method::GET,
     ).await;
 
