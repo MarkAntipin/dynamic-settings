@@ -36,6 +36,7 @@ async fn test_auth_invalid_api_key_header() {
         // not valid api key
         format!("{}:not-valid", app.api_key),
         None,
+        None,
         reqwest::Method::GET,
     ).await;
 
@@ -62,6 +63,7 @@ async fn test_validate_token_invalid_token() {
         format!("{}/api/v1/auth/validate-token", &app.address),
         app.api_key.clone(),
         Some(body),
+        None,
         reqwest::Method::POST,
     ).await;
 
@@ -88,6 +90,7 @@ async fn test_validate_token_ok() {
         format!("{}/api/v1/auth/validate-token", &app.address),
         app.api_key.clone(),
         Some(body),
+        None,
         reqwest::Method::POST,
     ).await;
 

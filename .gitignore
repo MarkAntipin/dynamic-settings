@@ -5,3 +5,5 @@ tags
 .DS_Store
 .env
 /db
+/.claude
+dynamic-settings.db

@@ -16,7 +16,7 @@ It provides a web-based UI and an API to manage settings efficiently.
 ```
 docker pull markantipin12/dynamic-settings
 
-docker run -d -p 18100:18100 -v db_data:/app/db markantipin12/dynamic-settings
+docker run -e API_KEY=api-key -d -p 18100:18100 -v db_data:/app/db markantipin12/dynamic-settings
 
 open http://localhost:18100
 ```
@@ -25,5 +25,5 @@ open http://localhost:18100
 ```
 APPLICATION_PORT=18100	# The port on which the application will run
 API_KEY=api-key # The API key to access the API
+DATABASE_URL=sqlite://dynamic-settings.db # The database url
 ```
-

@@ -10,6 +10,7 @@ async fn test_health_check_ok() {
         format!("{}/health", &app.address),
         app.api_key.clone(),
         None,
+        None,
         reqwest::Method::GET,
     ).await;
 

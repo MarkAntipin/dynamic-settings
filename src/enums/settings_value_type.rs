@@ -1,9 +1,11 @@
 use std::fmt;
 
 use serde::{Deserialize, Serialize};
+use sqlx;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, sqlx::Type, Clone)]
 #[serde(rename_all = "lowercase")]
+#[sqlx(rename_all = "lowercase")]
 pub enum SettingsValueType {
     Str,
     Int,

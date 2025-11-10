@@ -9,7 +9,7 @@ pub async fn get_settings_by_key(
     db: web::Data<SettingsDB>,
     key: web::Path<String>,
 ) -> Result<HttpResponse, CustomError> {
-    let settings_row = db_get_settings_by_key(&db, &key)?;
+    let settings_row = db_get_settings_by_key(&db, &key).await?;
     if settings_row.is_none() {
         return Err(CustomError::NotFoundError(format!("Settings with key '{}' not found",  key)));
     }
@@ -20,6 +20,6 @@ pub async fn get_settings(
     db: web::Data<SettingsDB>,
     query: web::Query<GetSettingsQueryParams>,
 ) -> Result<HttpResponse, CustomError> {
-    let settings_rows = db_get_settings(&db, query.prefix.clone())?;
+    let settings_rows = db_get_settings(&db, query.prefix.clone()).await?;
     Ok(HttpResponse::Ok().json(settings_rows))
 }

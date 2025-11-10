@@ -13,8 +13,8 @@ pub async fn update_settings(
     update_setting_payload.validate()?;
 
     let key = db_update_settings_by_key(
-        &db, &update_setting_payload.key, &update_setting_payload.value
-    )?;
+        &db.pool, &update_setting_payload.key, &update_setting_payload.value
+    ).await?;
 
     if key.is_none() {
         return Err(CustomError::NotFoundError(

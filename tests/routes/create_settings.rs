@@ -37,6 +37,7 @@ async fn test_create_settings_ok() {
             format!("{}/api/v1/settings", &app.address),
             app.api_key.clone(),
             Some(body),
+            None,
             reqwest::Method::POST,
         ).await;
 
@@ -46,7 +47,7 @@ async fn test_create_settings_ok() {
         let body: MessageResponse = response.json().await.unwrap();
         assert_eq!(body.message, format!("Settings with key '{}' created", key));
 
-        let settings = get_settings(&app.partition, &key).unwrap().unwrap();
+        let settings = get_settings(&app.pool, &key).await.unwrap().unwrap();
         assert_eq!(settings.key, key);
         assert_eq!(settings.value, value);
     }
@@ -72,6 +73,7 @@ async fn test_create_settings_int_invalid() {
         format!("{}/api/v1/settings", &app.address),
         app.api_key.clone(),
         Some(body),
+        None,
         reqwest::Method::POST,
     ).await;
 
@@ -99,7 +101,7 @@ async fn test_create_settings_key_already_exists() {
         updated_at: Utc::now(),
     };
 
-    create_settings(&app.partition, &settings);
+    create_settings(&app.pool, &settings).await.expect("Failed to create settings");
 
     let body = serde_json::json!({
         "key": key,
@@ -112,6 +114,7 @@ async fn test_create_settings_key_already_exists() {
         format!("{}/api/v1/settings", &app.address),
         app.api_key.clone(),
         Some(body),
+        None,
         reqwest::Method::POST,
     ).await;
 
@@ -144,6 +147,7 @@ async fn test_create_settings_invalid_input_missing_type() {
         format!("{}/api/v1/settings", &app.address),
         app.api_key.clone(),
         Some(body),
+        None,
         reqwest::Method::POST,
     ).await;
 
@@ -173,6 +177,7 @@ async fn test_create_settings_invalid_input_key_is_to_big() {
         format!("{}/api/v1/settings", &app.address),
         app.api_key.clone(),
         Some(body),
+        None,
         reqwest::Method::POST,
     ).await;
 

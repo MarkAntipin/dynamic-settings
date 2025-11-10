@@ -5,3 +5,4 @@ mod delete_settings;
 mod update_settings;
 mod health_check;
 mod helpers;
+mod get_settings;

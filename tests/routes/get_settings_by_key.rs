@@ -22,12 +22,13 @@ async fn test_get_settings_by_key_ok() {
         updated_at: Utc::now()
     };
 
-    create_settings(&app.partition, &settings);
+    create_settings(&app.pool, &settings).await.expect("Failed to create settings");
 
     // Act
     let response = make_request(
         format!("{}/api/v1/settings/{}", &app.address, key),
         app.api_key.clone(),
+        None,
         None,
         reqwest::Method::GET,
     ).await;
@@ -50,6 +51,7 @@ async fn test_get_settings_by_key_key_does_not_exist() {
     let response = make_request(
         format!("{}/api/v1/settings/{}", &app.address, key),
         app.api_key.clone(),
+        None,
         None,
         reqwest::Method::GET,
     ).await;
