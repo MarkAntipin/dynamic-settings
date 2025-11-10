@@ -9,7 +9,6 @@ use actix_web::{
 };
 use actix_cors::Cors;
 use actix_files;
-use env_logger::Env;
 
 use crate::{
     errors::CustomError,
@@ -68,7 +67,6 @@ pub fn run(
 ) -> Result<Server, std::io::Error> {
     let db = web::Data::new(db);
     let api_key = web::Data::new(api_key);
-    env_logger::init_from_env(Env::default().default_filter_or("info"));
 
     let server = HttpServer::new(move || {
         let cors = Cors::permissive();

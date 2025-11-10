@@ -1,30 +1,47 @@
 use std::option::Option;
+use std::path::PathBuf;
+use std::fs;
+use uuid::Uuid;
 
 use dynamic_settings::config::get_config;
 use dynamic_settings::models::{SettingsDBRow, SettingsDB};
 use dynamic_settings::startup;
 use std::net::TcpListener;
 use reqwest::header::{HeaderMap, HeaderValue};
-use tokio::sync::OnceCell;
 use sqlx::sqlite::{SqlitePool, SqlitePoolOptions};
 
 pub struct TestApp {
     pub address: String,
     pub pool: SqlitePool,
     pub api_key: String,
+    pub db_path: PathBuf,
 }
 
-async fn setup_app() -> TestApp {
+impl Drop for TestApp {
+    fn drop(&mut self) {
+        // Clean up the database file after tests
+        if let Err(e) = fs::remove_file(&self.db_path) {
+            eprintln!("Failed to remove test database file: {}", e);
+        }
+    }
+}
+
+pub async fn spawn_app() -> TestApp {
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
     let port = listener.local_addr().unwrap().port();
 
     let config = get_config().expect("Failed to read configuration.");
 
-    // Create in-memory SQLite database
+    // Create SQLite database
+    let db_path = PathBuf::from(format!("test_db_{}.db", Uuid::new_v4()));
+    let db_url = format!("sqlite://{}", db_path.to_string_lossy());
+
+    fs::File::create(&db_path).expect("Failed to create test database file");
+
     let pool = SqlitePoolOptions::new()
-        .connect("sqlite:file:test_db?mode=memory&cache=shared")
+        .connect(&db_url)
         .await
-        .expect("Failed to create in-memory SQLite pool");
+        .expect("Failed to create SQLite pool");
 
     // Run migrations
     sqlx::migrate!("./migrations")
@@ -45,16 +62,9 @@ async fn setup_app() -> TestApp {
         address: format!("http://127.0.0.1:{}", port),
         pool,
         api_key: config.api_key,
+        db_path,
     }
 }
-
-static INIT: OnceCell<TestApp> = OnceCell::const_new();
-
-// setup_app called only once
-pub async fn spawn_app() -> &'static TestApp {
-    INIT.get_or_init(setup_app).await
-}
-
 
 pub async fn make_request(
     url: String,
