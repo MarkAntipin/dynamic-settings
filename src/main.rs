@@ -14,7 +14,7 @@ async fn main() -> std::io::Result<()> {
     let config = get_config().expect("Failed to read configuration.");
 
     let db_options = SqliteConnectOptions::new()
-        .filename(config.sqlite_filename())
+        .filename(config.sqlite_filepath())
         .create_if_missing(true);
 
     let pool = SqlitePool::connect_with(db_options)

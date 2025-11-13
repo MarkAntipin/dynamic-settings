@@ -1,6 +1,7 @@
 use config::Environment;
 use dotenv::dotenv;
 use serde::Deserialize;
+use std::path::PathBuf;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
@@ -15,12 +16,12 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn sqlite_filename(&self) -> String {
-        // Extract filename from sqlite_url (e.g., "sqlite://dynamic-settings.db" -> "dynamic-settings.db")
-        self.sqlite_url
-            .strip_prefix("sqlite://")
-            .unwrap_or(&self.sqlite_url)
-            .to_string()
+    pub fn sqlite_filepath(&self) -> PathBuf {
+        // sqlite:///app/db/dynamic-settings.db  ->  /app/db/dynamic-settings.db
+        let path = self.sqlite_url.strip_prefix("sqlite://")
+            .expect("Invalid sqlite_url format");
+
+        PathBuf::from(&path)
     }
 }
 

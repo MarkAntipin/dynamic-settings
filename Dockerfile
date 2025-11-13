@@ -31,11 +31,9 @@ WORKDIR /app
 COPY --from=backend-builder /usr/src/app/target/release/dynamic_settings .
 COPY --from=frontend-builder /app/ui/dist /app/ui/dist
 
-RUN mkdir -p /app/data
+RUN mkdir -p /app/db
 
-# Environment variables
-ENV APP_DB_NAME=/app/data/dynamic-settings.db
-ENV DATABASE_URL=sqlite:///app/data/dynamic-settings.db
+ENV SQLITE_URL=sqlite:///app/db/dynamic-settings.db
 
 # Run migrations on startup, then launch app
 CMD ["./dynamic_settings"]
