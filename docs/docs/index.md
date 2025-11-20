@@ -21,6 +21,13 @@ docker run -e API_KEY=api-key -d -p 18100:18100 -v db_data:/app/db markantipin12
 open http://localhost:18100
 ```
 
+## 📚 API Documentation
+
+The Swagger API documentation is available at `/docs` endpoint:
+```
+http://localhost:18100/docs
+```
+
 ## 🙈 Environment Variables
 ```
 APPLICATION_PORT=18100	# The port on which the application will run

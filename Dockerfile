@@ -29,6 +29,7 @@ RUN apk add --no-cache bash sqlite
 WORKDIR /app
 
 COPY --from=backend-builder /usr/src/app/target/release/dynamic_settings .
+COPY --from=backend-builder /usr/src/app/swagger /app/swagger
 COPY --from=frontend-builder /app/ui/dist /app/ui/dist
 
 RUN mkdir -p /app/db

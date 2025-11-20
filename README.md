@@ -19,6 +19,12 @@ docker run -d -p 18100:18100 -v db_data:/app/db markantipin12/dynamic-settings
 open http://localhost:18100
 ```
 
+## 📚 API Documentation
+
+The Swagger API documentation is available at `/docs` endpoint:
+```
+http://localhost:18100/docs
+```
 
 ## ✨ Features
 
