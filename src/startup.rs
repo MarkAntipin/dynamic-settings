@@ -91,6 +91,10 @@ pub fn run(
                 )
             )
             .route("/health", web::get().to(health_check))
+            .service(
+                actix_files::Files::new("/docs", "./swagger")
+                    .index_file("index.html")
+            )
             .app_data(api_key.clone())
             .app_data(db.clone())
             .configure(json_error_handler);
