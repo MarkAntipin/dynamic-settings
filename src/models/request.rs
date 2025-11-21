@@ -15,12 +15,6 @@ pub struct CreateSettingsRequest {
     pub value_type: SettingsValueType,
 }
 
-impl From<&CreateSettingsRequest> for Vec<u8> {
-    fn from(val: &CreateSettingsRequest) -> Self {
-        rmp_serde::to_vec(&val).expect("Error serializing settings to bytes")
-    }
-}
-
 impl CreateSettingsRequest {
     pub fn validate(&self) -> Result<(), CustomError> {
         if self.key.len() > MAX_KEY_LENGTH {
