@@ -23,12 +23,6 @@ pub struct SettingsDBRow {
     pub updated_at: DateTime<Utc>,
 }
 
-impl From<&SettingsDBRow> for Vec<u8> {
-    fn from(val: &SettingsDBRow) -> Self {
-        rmp_serde::to_vec(&val).expect("Error serializing settings to bytes")
-    }
-}
-
 impl From<CreateSettingsRequest> for SettingsDBRow {
     fn from(request: CreateSettingsRequest) -> Self {
         let now = Utc::now();
